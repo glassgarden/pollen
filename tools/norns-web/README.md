@@ -212,7 +212,8 @@ value (`params:get("x")`), a statement just runs. Up and down recall history.
 - **Audio:** only what the stand-in plays.
 - **`norns.system_cmd`** goes to the stand-in's `system_cmd(cmd)` first, then to a built-in
   `curl` (on `fetch`: `-s -L -f -I -m -A -H -o -w '%{url_effective}'`, one URL, no pipes), and is
-  otherwise logged, not run. Its callback gets the output later, as on norns. `util.make_dir`
+  otherwise logged, not run. Its callback gets the output later, as on norns, and as on norns
+  the commands run one at a time, each after the one before it finishes. `util.make_dir`
   works; files written by `curl -o` are there for Lua's `io.open`, until the page reloads.
 
 ## License

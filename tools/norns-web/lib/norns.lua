@@ -506,15 +506,24 @@ engine = setmetatable({}, {
 _path = { code = "/code/", dust = "/dust/", data = "/data/", audio = "/audio/" }
 -- norns.system_cmd: run by the page (js.system_cmd: the stand-in's system_cmd, else a built-in
 -- curl on fetch, else logged); the output comes back later through norns_web.system_cmd_done,
--- as norns' own runs in the background. Without the page's help it's logged and answers "".
-local pending_cmds, next_cmd = {}, 0
+-- as norns' own runs in the background. Like norns' (lua/core/norns.lua), one at a time: a
+-- command waits for the ones before it to finish, so a slow one holds up the rest here too.
+-- Without the page's help it's logged and answers "".
+local cmd_queue, cmd_busy, next_cmd = {}, false, 0
+local function run_next_cmd()
+  local c = cmd_queue[1]
+  if not c then cmd_busy = false; return end
+  cmd_busy = true
+  next_cmd = next_cmd + 1
+  c.id = next_cmd
+  js.system_cmd(c.id, c.cmd)
+end
 norns = {
   state = {}, version = { update = "norns-web" },
   system_cmd = function(cmd, cb)
     if js.system_cmd then
-      next_cmd = next_cmd + 1
-      pending_cmds[next_cmd] = cb or false
-      js.system_cmd(next_cmd, cmd)
+      cmd_queue[#cmd_queue + 1] = { cmd = cmd, cb = cb }
+      if not cmd_busy then run_next_cmd() end
     else
       print("system_cmd (not run in the browser): " .. cmd)
       if cb then cb("") end
@@ -647,9 +656,12 @@ function norns_web.repl(code)
 end
 
 function norns_web.system_cmd_done(id, out)
-  local cb = pending_cmds[id]
-  pending_cmds[id] = nil
-  if cb then guarded(cb, out or "") end
+  local c = cmd_queue[1]
+  if not c or c.id ~= id then return end
+  table.remove(cmd_queue, 1)
+  -- (a command the callback runs queues behind the next one, as on norns)
+  if c.cb then guarded(c.cb, out or "") end
+  run_next_cmd()
 end
 function norns_web.enc(n, d) if enc then guarded(enc, n, d) end end
 function norns_web.key(n, z) if key then guarded(key, n, z) end end

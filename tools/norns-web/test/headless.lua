@@ -53,5 +53,18 @@ local out
 norns.system_cmd("echo hi", function(o) out = o end)
 assert(out == "ran: echo hi", "system_cmd: the callback didn't get the output")
 
+-- one at a time, as on norns: a command waits for the one before it to finish
+local held, order = {}, {}
+local answer = js_bridge.system_cmd
+js_bridge.system_cmd = function(id, cmd) held[#held + 1] = { id = id, cmd = cmd } end
+norns.system_cmd("first", function(o) order[#order + 1] = o end)
+norns.system_cmd("second", function(o) order[#order + 1] = o end)
+assert(#held == 1, "system_cmd: the second ran before the first finished")
+norns_web.system_cmd_done(held[1].id, "1")
+assert(#held == 2 and held[2].cmd == "second", "system_cmd: the second didn't run after the first")
+norns_web.system_cmd_done(held[2].id, "2")
+assert(order[1] == "1" and order[2] == "2", "system_cmd: callbacks out of order")
+js_bridge.system_cmd = answer
+
 print(string.format("%s: %d frames in %d s, %d error(s)", name, frames, seconds, #errors))
 if #errors > 0 or frames == 0 then os.exit(1) end
