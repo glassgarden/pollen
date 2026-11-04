@@ -40,11 +40,16 @@ make web       # the real script in a browser at http://localhost:8800/
 - **No numbers on screen.** The picture is the readout; names show briefly on touch; hold K1 peeks.
 - Params group sizes are declared up front (`counts` in `add_params`); the smoke test checks them.
   Add new options at the end of their lists (`lib/sound.lua`), so saved PSETs keep their choices.
-- **The radio runs programs through `norns.system_cmd`** (curl, mpv, socat, pkill): a new command
-  shape must be answered by `Engine_Pollen.js`'s `system_cmd()` (mpv, socat, pkill; curl is
+- **The radio runs programs through `norns.system_cmd`** (curl, mpv, socat): a new command
+  shape must be answered by `Engine_Pollen.js`'s `system_cmd()` (mpv, socat; curl is
   norns-web's) and by the fake mpv in `test/smoke.lua`, or the browser and the test break.
   `lib/radio.lua` is stateful: include it only from `pollen.lua`.
-- The radio's commands never block: `util.os_capture` only for `command -v` at start.
+- **`norns.system_cmd` is one queue:** each command waits for the one before it to finish
+  (norns-web queues them the same way). A slow command (curl, up to 30 s) holds up every mpv
+  command behind it, so a refresh and a move never overlap (`lib/radio.lua`).
+- The radio's commands never block, with two exceptions through `util.os_capture`: `command -v`
+  at start, and `pkill` (`Player.kill`, at start and in cleanup: it can't wait in the queue).
+  `Engine_Pollen.js`'s `os_capture()` and the smoke test answer it.
 - `tools/norns-web` is a **git subtree** of github.com/carlosedp/norns-web: keep it generic,
   commit changes to it apart from pollen's, send them back with `make norns-web-push BRANCH=...`.
   `git subtree` here needs GNU `dirname` (the Makefile handles it; uutils' breaks the prefix).

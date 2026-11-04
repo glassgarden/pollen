@@ -108,6 +108,9 @@ Backend is a param (`radiogarden` / `radiobrowser`), auto-fallback if the first 
 ### 4.3 Async HTTP
 
 - Never block the Lua main thread. Use `norns.system_cmd(cmd, callback)` (async) for curl calls; parse in callback.
+- `norns.system_cmd` runs one command at a time (a FIFO in `lua/core/norns.lua`): a curl in flight
+  delays every mpv command after it. A station refresh waits for a move to end, and a move doesn't
+  start during a refresh. Stopping mpv (`pkill`) goes through `util.os_capture`, not the queue.
 - Timeouts on every curl (`--max-time`).
 
 ### 4.4 Player (`player.lua`)

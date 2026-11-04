@@ -29,7 +29,7 @@
 // MIT); see doc/DESIGN.md.
 
 Engine_Pollen : CroneEngine {
-	var group, bufs, envBufs, headBus, ampBus, reelBus, dryBus, wetBus, fbBus;
+	var group, bufs, retired, envBufs, headBus, ampBus, reelBus, dryBus, wetBus, fbBus;
 	var writer, grains, outSynth;
 
 	*new { arg context, doneCallback;
@@ -47,6 +47,7 @@ Engine_Pollen : CroneEngine {
 		wetBus = Bus.audio(s, 2);
 		fbBus = Bus.audio(s, 2);
 		bufs = this.newReel(15);
+		retired = [];
 		// grain envelopes: 0 = GrainBuf's own Hann (-1), 1 = a pluck, 2 = a block with soft edges
 		envBufs = [
 			Buffer.sendCollection(s, Env.perc(0.04, 0.96, 1, -4).discretize(1024)),
@@ -172,23 +173,32 @@ Engine_Pollen : CroneEngine {
 		this.addCommand(\clear, "", { bufs.do(_.zero) });
 	}
 
-	// a new reel: allocate, wait for the server, hand it to the writer and the grains, then
-	// free the old one
+	// a new reel: allocate it and swap it in at once, and retire the old one; then wait for the
+	// server and hand it to the writer and the grains. Turned through quickly (a command per
+	// detent), the calls overlap: only the latest one hands its reel over, and it frees what was
+	// retired before it did, once the synths have let go of it (a Routine runs later, so the swap
+	// happens here; freed earlier, a reel the synths still read could be reused by the server)
 	setReel { |seconds|
-		var old = bufs, s = context.server;
+		var new = this.newReel(seconds), s = context.server;
+		retired = retired.add(bufs);
+		bufs = new;
 		Routine {
-			bufs = this.newReel(seconds);
+			var done;
 			s.sync;
-			writer.set(\bufL, bufs[0], \bufR, bufs[1]);
-			grains.set(\bufL, bufs[0], \bufR, bufs[1]);
-			s.sync;
-			old.do(_.free);
+			if (bufs === new) {
+				done = retired; retired = [];
+				writer.set(\bufL, new[0], \bufR, new[1]);
+				grains.set(\bufL, new[0], \bufR, new[1]);
+				s.sync;
+				done.do { |pair| pair.do(_.free) };
+			};
 		}.play;
 	}
 
 	free {
 		group !? { group.free };
 		bufs.do(_.free);
+		retired.do { |pair| pair.do(_.free) }; retired = [];
 		envBufs.do(_.free);
 		[headBus, ampBus, reelBus, dryBus, wetBus, fbBus].do { |b| b !? { b.free } };
 	}

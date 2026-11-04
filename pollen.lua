@@ -18,8 +18,9 @@
 -- radio; without them, it
 -- plays the norns input
 --
--- by Voltage Foundry Modular
+-- v0.2 by Voltage Foundry Modular
 -- vfmod.com
+-- github.com/carlosedp/pollen
 
 -- Copyright (C) 2026 Voltage Foundry Modular. Free software under the GNU GPL v3.0
 -- (see LICENSE).
@@ -72,6 +73,11 @@ local seeking, trail, amp = nil, {}, 0 -- the station being tried, the last ones
 local PACES = { false, 600, 300, 120, 60, 30 }
 local word = ""
 local redraw_metro
+-- the last session: saved on the way out and read at start, apart from the numbered PSETs (as in
+-- terrarium); not in the browser, where every start is the defaults
+local LAST = "last.pset" -- in norns.state.data
+local function resumes() return not (norns.version and norns.version.update == "norns-web") end
+local params_added = false
 
 local function m(id) return params:get(id) end
 local function pressed() return m("catch_press") == 1 or (tuning and m("handover") == 2) end
@@ -399,6 +405,9 @@ end
 
 function init()
   add_params()
+  params_added = true
+  local last = norns.state.data .. LAST
+  if resumes() and util.file_exists(last) then params:read(last, true) end -- silent: one bang
   params:bang()
   send()
   -- the engine tells where its write head really is (the mirror drifts) and what it writes
@@ -450,4 +459,6 @@ end
 function cleanup()
   if redraw_metro then redraw_metro:stop() end
   radio.cleanup()
+  -- (only once the params exist: an init that failed early mustn't overwrite the last session)
+  if params_added and resumes() then params:write(norns.state.data .. LAST, "last") end
 end

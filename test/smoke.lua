@@ -23,10 +23,8 @@ local STATIONS_JSON = json.encode(records)
 -- first station asked for never plays (a dead stream).
 local mpv = { a = {}, b = {} }
 local loads, curls, killed, first = {}, 0, 0, true
-local function fake_cmd(cmd)
-  if cmd:match("^curl .*radio%-browser") then curls = curls + 1; return STATIONS_JSON end
-  if cmd:match("^nohup mpv") then return "" end
-  if cmd:match("^pkill") then killed = killed + 1; return "" end
+local fake_cmd
+local function fake_mpv(cmd)
   local line, name = cmd:match("^echo '(.*)' | socat %- /tmp/pollen_(%a)%.sock")
   assert(line, "a command pollen shouldn't run: " .. cmd)
   local c = json.decode(line).command
@@ -43,6 +41,14 @@ local function fake_cmd(cmd)
     p.url = nil
   end
   return '{"request_id":0,"error":"success"}\n'
+end
+fake_cmd = function(cmd)
+  if cmd:match("^curl .*radio%-browser") then curls = curls + 1; return STATIONS_JSON end
+  if cmd:match("^nohup mpv") then return "" end
+  assert(not cmd:match("^pkill"), "pkill through system_cmd: it would wait in the queue")
+  local out = {}
+  for l in cmd:gmatch("[^\n]+") do out[#out + 1] = fake_mpv(l) end -- a line per mpv command
+  return table.concat(out)
 end
 -- the station that's audible: the player at full volume
 local function playing()
@@ -67,7 +73,10 @@ js_bridge = {
     end
   end,
   engine_name = function() end,
-  os_capture = function(cmd) return cmd:match("^command %-v (%a+)") and "/usr/bin/x" or "" end,
+  os_capture = function(cmd)
+    if cmd:match("^pkill %-f 'input%-ipc%-server=/tmp/pollen_%[ab%]'") then killed = killed + 1; return "" end
+    return cmd:match("^command %-v (%a+)") and "/usr/bin/x" or ""
+  end,
   system_cmd = function(id, cmd) norns_web.system_cmd_done(id, fake_cmd(cmd)) end,
   make_dir = function(path) os.execute("mkdir -p '" .. path .. "'") end,
   storage_get = function() end,
@@ -145,6 +154,17 @@ norns_web.key(1, 1); press(2); norns_web.key(1, 0); run(20)
 assert(playing() == here, "K1 + K2 didn't go back: " .. tostring(playing()))
 ok("radio: drift and back")
 
+-- a refresh asked for during a move waits for it to end (norns runs one command at a time: a
+-- curl in the middle of a move would starve its mpv checks)
+local from = playing()
+press(3); run(1)
+params:set("refresh", 1); run(0.5)
+assert(curls == 1, "the refresh ran in the middle of a move")
+run(20)
+assert(curls == 2, "the refresh never ran after the move, curls: " .. curls)
+assert(playing() and playing() ~= from, "the move didn't arrive")
+ok("radio: a refresh waits for the move")
+
 -- the pace: at its quickest, every 30 s, the wind moves on by itself
 params:set("wind_pace", 1)
 local before_auto = #loads
@@ -158,7 +178,7 @@ for k = 1, #W_KINDS do params:set("wind_kind", k); press(3); run(20) end
 ok("radio: every wind")
 
 -- the cache: a fresh start reads it instead of fetching
-assert(io.open(_path.data .. "pollen/stations_radiobrowser.lua"), "no station cache written")
+assert(io.open(norns.state.data .. "stations_radiobrowser.lua"), "no station cache written")
 
 -- every part: both macros to both ends, the gesture twice, every variety
 for part = 1, 6 do

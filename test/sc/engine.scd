@@ -92,7 +92,14 @@ Routine {
 	check.("static alone", (~r[0] > 0.01) and: { ~r[1] < 1 }, ~r);
 	eng.cmd(\set, \static, 0);
 
-	eng.cmd(\reel, 30); tone.set(\on, 1); eng.cmd(\set, \mix, 1); 0.5.wait;
+	// the reel turned through its lengths in a row (one command per detent): every reel but the
+	// last is freed, none twice
+	~bufs = { var n = 0; Buffer.cachedBuffersDo(s, { n = n + 1 }); n };
+	~n0 = ~bufs.value;
+	[4, 60, 15, 8, 30].do { |secs| eng.cmd(\reel, secs) };
+	1.wait;
+	check.("reels in a row leave one reel", ~bufs.value == ~n0, [~bufs.value, ~n0]);
+	tone.set(\on, 1); eng.cmd(\set, \mix, 1); 0.5.wait;
 	~r = measure.(2);
 	check.("a new 30 s reel catches again", ~r[0] > 0.005, ~r);
 	eng.cmd(\clear); tone.set(\on, 0); 2.wait; // the reverb's tail dies away

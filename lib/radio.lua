@@ -9,7 +9,8 @@
 --   R.init(hooks)   hooks: tuning(on) (press/static while moving), seeking(station) (the one
 --                   being tried), arrived(station),
 --                   status(text), settings() -> { kind, reach, xfade, timeout, settle, volume }
---   R.drift()       move on with the wind (ignored while already moving)
+--   R.drift()       move on with the wind (ignored while already moving, or refreshing)
+--   R.refresh()     fetch the stations again (after the move, if one is on)
 --   R.back()        back to the station before (history)
 --   R.cleanup()
 
@@ -56,17 +57,24 @@ local function crossfade(to, s)
   local steps = math.max(12, math.ceil(time * 2))
   for i = 1, steps do
     local v = i / steps
-    Player.send(to, { "set_property", "volume", math.floor(100 * v * s.volume + 0.5) })
+    local both = { { to, { "set_property", "volume", math.floor(100 * v * s.volume + 0.5) } } }
     if from ~= to then -- the first station has nothing to fade from
-      Player.send(from, { "set_property", "volume", math.floor(100 * (1 - v) * s.volume + 0.5) })
+      both[2] = { from, { "set_property", "volume", math.floor(100 * (1 - v) * s.volume + 0.5) } }
     end
+    Player.send_each(both) -- one step, one shell
     clock.sleep(time / steps)
   end
   if from ~= to then Player.send(from, { "stop" }) end
 end
 
+-- norns.system_cmd runs one command at a time, so a refresh's curl (up to 30 s a server) would
+-- hold up a move's mpv commands until its checks time out and good stations get marked dead.
+-- A move and a refresh never overlap: a move waits out a refresh (refusing), a refresh waits
+-- for a move to end.
+local refreshing, refresh_asked = false, nil
+
 local function move()
-  if R.busy or not R.stations then return false end
+  if R.busy or refreshing or not R.stations then return false end
   R.busy = true
   clock.run(function()
     local s = hooks.settings()
@@ -110,6 +118,7 @@ local function move()
     if not arrived then set_status(R.current and "playing" or "silent") end
     hooks.tuning(false)
     R.busy = false
+    if refresh_asked then R.refresh() end
   end)
   return true
 end
@@ -117,7 +126,7 @@ end
 function R.drift() return move() end
 
 function R.back()
-  if R.busy or #history < 2 then return false end
+  if R.busy or refreshing or #history < 2 then return false end
   table.remove(history) -- the one playing now
   forced = table.remove(history)
   return move()
@@ -149,8 +158,15 @@ function R.init(h)
   end)
 end
 
+-- fetch the stations again; while a move is on, once it ends (see refreshing, above)
 function R.refresh()
-  Stations.refresh(function(list) if list then R.stations = list end end)
+  if refreshing then return end
+  if R.busy then refresh_asked = true; return end
+  refresh_asked, refreshing = nil, true
+  Stations.refresh(function(list)
+    refreshing = false
+    if list then R.stations = list end
+  end)
 end
 
 function R.cleanup() Player.kill() end

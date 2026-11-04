@@ -22,7 +22,8 @@ St.MAX_AGE = 7 * 24 * 3600
 St.SERVERS = { "de1.api.radio-browser.info", "de2.api.radio-browser.info" }
 St.LAST_RESORT = "all.api.radio-browser.info"
 
-local function cache_file() return _path.data .. "pollen/stations_radiobrowser.lua" end
+-- in the script's data folder (norns.state.data: dust/data/<the script's folder>/)
+local function cache_file() return norns.state.data .. "stations_radiobrowser.lua" end
 
 local function trim(s) return (tostring(s or ""):gsub("^%s+", ""):gsub("%s+$", ""):gsub("%s+", " ")) end
 
@@ -43,7 +44,7 @@ function St.simplify(records)
 end
 
 function St.save(list)
-  util.make_dir(_path.data .. "pollen")
+  util.make_dir(norns.state.data) -- norns makes it before the script runs; norns-web doesn't
   local f = io.open(cache_file(), "w")
   if not f then return false end
   f:write(("return { fetched = %d, stations = {\n"):format(os.time()))

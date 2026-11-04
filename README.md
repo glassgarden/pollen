@@ -120,6 +120,8 @@ where the grains are read from (position). The grains leave the tape from there,
 forwards and down when backwards, faster the higher they're pitched; silence throws none. Pressed,
 the head stops and the whole tape holds evenly lit. The haze over it is the reverb. Every
 macro, variety and gesture is also in PARAMS, so it saves with PSETs and can be MIDI-mapped.
+pollen picks up where it left off: the settings are kept on the way out (`last.pset` in its data
+folder, apart from the numbered PSETs) and read at the next start.
 
 ## How it's built
 
