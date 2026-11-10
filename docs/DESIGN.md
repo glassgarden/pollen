@@ -253,7 +253,7 @@ local d = deps.new { name = "pollen", dir = _path.data .. "pollen/deps" }
 d:add { id = "mpv",   label = "mpv",   check = "mpv",   pkg = "mpv",   why = "plays the radio" }
 d:add { id = "socat", label = "socat", check = "socat", pkg = "socat", why = "talks to mpv" }
 d:add { id = "mi",    label = "mi-UGens", check_ugens = "MiVerb",
-        ugens = "https://github.com/carlosedp/norns-mi-UGens/releases/latest/download/mi-UGens-norns.tar.gz",
+        ugens = "https://github.com/glassgarden/norns-mi-UGens/releases/latest/download/mi-UGens-norns.tar.gz",
         why = "the reverb (optional)" }
 ```
 

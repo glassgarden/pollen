@@ -22,7 +22,7 @@ Morphagene and Endorphin.es Evil Pet. See [docs/DESIGN.md](docs/DESIGN.md) for t
 From the maiden REPL:
 
 ```
-;install https://github.com/carlosedp/pollen
+;install https://github.com/glassgarden/pollen
 ```
 
 The radio needs **mpv** and **socat** on the norns (over ssh: `sudo apt install -y mpv socat`;
@@ -165,7 +165,7 @@ pollen is made by [Voltage Foundry Modular](https://vfmod.com). © 2026 Voltage 
   media stage follows Beads' four. Inspired by Make Noise Morphagene and Endorphin.es Evil Pet.
 - **The reverb**, when installed, is MiVerb from Volker Böhm's
   [mi-UGens](https://github.com/v7b1/mi-UGens) (GPL-3.0); the browser carries it as WebAssembly,
-  built by [norns-mi-UGens](https://github.com/carlosedp/norns-mi-UGens) (`lib/Engine_Pollen/BUILDINFO`).
+  built by [norns-mi-UGens](https://github.com/glassgarden/norns-mi-UGens) (`lib/Engine_Pollen/BUILDINFO`).
 - [wasmoon](https://github.com/ceifa/wasmoon) (MIT) is vendored in `tools/norns-web`.
 - **The stations** come from [radio-browser.info](https://www.radio-browser.info), a community
   database; pollen fetches its list at most once a week and identifies itself when it does. The

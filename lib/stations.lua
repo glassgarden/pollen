@@ -13,7 +13,7 @@ local json = include("lib/json")
 
 local St = {}
 
-St.UA = "pollen/0.2 (monome norns; https://github.com/carlosedp/pollen)"
+St.UA = "pollen/0.2 (monome norns; https://github.com/glassgarden/pollen)"
 St.LIMIT = 1500
 St.MAX_AGE = 7 * 24 * 3600
 -- radio-browser's servers, tried in a random order until one answers, then all.api (their

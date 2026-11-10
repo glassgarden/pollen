@@ -20,7 +20,7 @@
 --
 -- v0.2 by Voltage Foundry Modular
 -- vfmod.com
--- github.com/carlosedp/pollen
+-- github.com/glassgarden/pollen
 
 -- Copyright (C) 2026 Voltage Foundry Modular. Free software under the GNU GPL v3.0
 -- (see LICENSE).

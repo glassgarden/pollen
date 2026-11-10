@@ -250,5 +250,5 @@ Save/load psets as normal; favorites saved separately in data dir.
 - mpv on norns via JACK (precedent): <https://github.com/schollz/norns.online>
 - norns scripting reference: <https://monome.org/docs/norns/>
 - Inspiration: Make Noise Morphagene, Endorphin.es Evil Pet
-- mi-UGens: <https://github.com/carlosedp/norns-mi-UGens>
-- terrarium: <https://github.com/carlosedp/terrarium>
+- mi-UGens: <https://github.com/glassgarden/norns-mi-UGens>
+- terrarium: <https://github.com/glassgarden/terrarium>
