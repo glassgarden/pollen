@@ -62,10 +62,10 @@ Wind kinds (the walk modes from SPEC §4.6, renamed for the screen):
 
 | wind       | walk mode   | moves                                                 |
 | ---------- | ----------- | ----------------------------------------------------- |
-| breeze     | `nearest`   | to the nearest flower you haven't visited             |
+| breeze     | `nearest`   | a hop in any direction, as far as reach goes          |
 | trade wind | `drift`     | steadily along one bearing                            |
 | eddy       | `wander`    | a random walk, the bearing turning a little each step |
-| gust       | `random`    | anywhere at all                                       |
+| gust       | `random`    | anywhere at all: any country, then any flower in it   |
 | far side   | `antipode`  | to the other side of the world, and back              |
 | dusk       | `sun`       | along the line where evening is falling right now     |
 | homeland   | `country`   | within one country                                    |

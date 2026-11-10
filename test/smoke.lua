@@ -116,6 +116,33 @@ do
   assert(Wk.distance(p, paris) < 1, "travel() along the bearing should land in Paris")
   local a = Wk.antipode({ lat = 10, lon = 170 })
   assert(a.lat == -10 and math.abs(a.lon - -10) < 1e-9, "antipode of 10N 170E is 10S 10W")
+  -- where the winds go, on a world like radio-browser's: one country with most of the stations
+  -- (200 around Berlin), and one station in each of 40 others spread over the globe
+  local world, berlin = {}, { lat = 52.52, lon = 13.40, country = "DE" }
+  for i = 1, 200 do
+    world[#world + 1] = { lat = 52.52 + (i % 20 - 10) * 0.01, lon = 13.40 + (i // 20 - 5) * 0.01, country = "DE" }
+  end
+  for i = 1, 40 do
+    world[#world + 1] = { lat = (i * 37) % 140 - 70, lon = (i * 83) % 360 - 180, country = "C" .. i }
+  end
+  local function farthest(kind, reach, moves)
+    local mem, at, far = {}, berlin, 0
+    for _ = 1, moves do
+      at = Wk.next(kind, world, at, mem, reach, nil)
+      far = math.max(far, Wk.distance(berlin, at))
+    end
+    return far
+  end
+  assert(farthest("breeze", 0, 10) < 100, "a breeze at the least reach should stay in town")
+  for _, kind in ipairs({ "breeze", "trade", "eddy" }) do
+    assert(farthest(kind, 1, 3) > 2000, "a " .. kind .. " at full reach should leave the country")
+  end
+  local countries, n = {}, 0
+  for _ = 1, 40 do
+    local st = Wk.next("gust", world, berlin, {}, 0.5, nil)
+    if not countries[st.country] then countries[st.country] = true; n = n + 1 end
+  end
+  assert(n > 15, "gusts should blow to many countries, not mostly the big one: " .. n)
 end
 local function ok(label) print(("ok  %-36s frames: %d"):format(label, frames)) end
 
