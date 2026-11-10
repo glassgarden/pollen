@@ -102,6 +102,11 @@ Routine {
 	tone.set(\on, 1); eng.cmd(\set, \mix, 1); 0.5.wait;
 	~r = measure.(2);
 	check.("a new 30 s reel catches again", ~r[0] > 0.005, ~r);
+	// a shorter reel while grains read far back on the long one: they must not read past its end
+	eng.cmd(\set, \position, 20); eng.cmd(\set, \size, 1); 21.wait;
+	eng.cmd(\reel, 4); eng.cmd(\set, \position, 0.5); eng.cmd(\set, \size, 0.15); 0.5.wait;
+	~r = measure.(2);
+	check.("a shorter reel, grains playing: it still sounds", ~r[0] > 0.005, ~r);
 	eng.cmd(\clear); tone.set(\on, 0); 2.wait; // the reverb's tail dies away
 	~r = measure.(1);
 	check.("cleared, input gone: silence", ~r[0] < 0.002, ~r);

@@ -103,6 +103,11 @@ set("static", 0);
 send({ reel: 30 }); inputOn = true; set("mix", 1);
 r = render(2);
 check("a new 30 s reel catches again", r.rms > 0.005, r);
+// a shorter reel while grains read far back on the long one: they must not read past its end
+set("position", 20); set("size", 1); render(21);
+send({ reel: 4 }); set("position", 0.5); set("size", 0.15);
+r = render(2);
+check("a shorter reel, grains playing: it still sounds", r.rms > 0.005, r);
 send({ clear: true }); inputOn = false;
 render(0.1); // what was already on its way out (the limiter looks 10 ms ahead)
 r = render(1);
