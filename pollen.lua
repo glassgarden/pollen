@@ -48,7 +48,7 @@ local PARTS = {
     gesture = "flip", hold = "tint_flip", variety = "tint_scale", variety2 = "tint_heads" },
   { id = "tone", macros = { "color", "drive" }, defaults = { 0.5, 0.1 },
     gesture = "fade", variety = "tone_media" },
-  { id = "air", macros = { "space", "mix" }, defaults = { 0.35, 1 },
+  { id = "air", macros = { "space", "mix" }, defaults = { 0.35, 0.75 },
     gesture = "haze", hold = "air_haze" },
 }
 

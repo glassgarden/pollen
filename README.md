@@ -1,6 +1,6 @@
 # <img src="doc/img/icon.svg" alt="" width="40" height="40" align="top"> pollen
 
-🌾 The world's radio, carried on the wind, scattered as grains. A live granular instrument for
+𓇢𓆸 The world's radio, carried on the wind, scattered as grains. A live granular instrument for
 [monome norns](https://monome.org/docs/norns/).
 
 **[Try it in your browser](https://pollen.glassgarden.cc/)**: the real script, on
@@ -32,83 +32,89 @@ from Clouds and Rings; without them, FreeVerb2.
 
 ## Controls
 
-| Control      | Does                                                                                     |
-| ------------ | ---------------------------------------------------------------------------------------- |
-| E1           | choose a part: wind, catch, scatter, tint, tone, air                                     |
-| E2, E3       | that part's two macros (their names and bars show for a moment while you turn them)               |
+| Control      | Does                                                                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| E1           | choose a part: wind, catch, scatter, tint, tone, air                                                                       |
+| E2, E3       | that part's two macros (their names and bars show for a moment while you turn them)                                        |
 | K3           | its gesture: drift (wind), press the reel (catch), a burst (scatter), backwards (tint), a fade (tone), hold the haze (air) |
-| hold K2 + E2 | its variety: the wind (wind), reel length (catch), grain envelope (scatter), scale (tint), media (tone) |
-| hold K2 + E3 | the heads: how many (catch), how far apart in pitch (tint)                               |
-| hold K1      | peek: every part and where its macros are, and the station                               |
-| hold K1 + K2 | back to the station before                                                               |
+| hold K2 + E2 | its variety: the wind (wind), reel length (catch), grain envelope (scatter), scale (tint), media (tone)                    |
+| hold K2 + E3 | the heads: how many (catch), how far apart in pitch (tint)                                                                 |
+| hold K1      | peek: every part and where its macros are, and the station                                                                 |
+| hold K1 + K2 | back to the station before                                                                                                 |
 
 Each part has two macros (E2 on the left, E3 on the right), a gesture (K3) and a variety (hold
 K2, turn E2). The bars beside the names show where each macro is.
 
 **wind**: when and where the radio moves to the next station.
-- *pace* (E2): how often it moves on by itself. All the way left (where it starts) it only moves
+
+- _pace_ (E2): how often it moves on by itself. All the way left (where it starts) it only moves
   when you drift (K3); then every 10, 5, 2 or 1 minutes, or every 30 seconds.
-- *reach* (E3): how far a move goes. Left stays close, a city or two away; right crosses
-  continents.
-- K3 *drift*: move on to the next station now.
-- variety, *the wind*: a breeze goes to one of the nearest stations, a trade wind keeps one
+- _reach_ (E3): how far a move goes. Left stays close, a city or two away; right crosses
+  oceans and continents.
+- K3 _drift_: move on to the next station now.
+- variety, _the wind_: a breeze hops off in any direction, a trade wind keeps one
   direction, an eddy wanders, a gust goes anywhere, the far side goes to the other side of the
   world and back.
 
 **catch**: the reel, the loop of tape the radio is recorded onto and the grains are read from.
-- *position* (E2): where on the reel the grains are read. Left is just behind the recording, so you
+
+- _position_ (E2): where on the reel the grains are read. Left is just behind the recording, so you
   hear the station almost live; right reaches back into what was caught seconds ago, and the
   grains come from a wider stretch of it.
-- *feedback* (E3): how much of the grains is recorded back onto the reel with the radio. Left: the
+- _feedback_ (E3): how much of the grains is recorded back onto the reel with the radio. Left: the
   reel holds only the radio. Right: the grains pile up on themselves into smears and drones.
-- K3 *press*: stop recording, so the reel holds what it has and the grains keep playing it (K3
+- K3 _press_: stop recording, so the reel holds what it has and the grains keep playing it (K3
   again releases it).
-- variety, *reel length*: 4, 8, 15, 30 or 60 seconds of tape.
-- hold K2 + E3, *heads*: how many places on the reel the grains are read from, 1 to 4. The heads
+- variety, _reel length_: 4, 8, 15, 30 or 60 seconds of tape.
+- hold K2 + E3, _heads_: how many places on the reel the grains are read from, 1 to 4. The heads
   sit evenly spread along the reel behind the first (which position moves), so you hear the
   station now and seconds ago at once. Each has its bracket under the tape.
 
 **scatter**: the grains themselves.
-- *density* (E2): how many: from one every two seconds to 40 a second, looser in time and wider
+
+- _density_ (E2): how many: from one every two seconds to 40 a second, looser in time and wider
   in stereo as there are more.
-- *size* (E3): how long each one is: from 20 ms, a click or a buzz, to 2 s, a long overlapping
+- _size_ (E3): how long each one is: from 20 ms, a click or a buzz, to 2 s, a long overlapping
   wash.
-- K3 *burst*: four times as many for a moment.
-- variety, *envelope*: the shape of each grain. Bell is smooth, pluck starts sharp and dies away,
+- K3 _burst_: four times as many for a moment.
+- variety, _envelope_: the shape of each grain. Bell is smooth, pluck starts sharp and dies away,
   block is square and clicky.
 
 **tint**: the pitch of the grains.
-- *pitch* (E2): from two octaves down (left) to two up (right); the middle plays them as
+
+- _pitch_ (E2): from two octaves down (left) to two up (right); the middle plays them as
   recorded. It snaps to the notes of the scale.
-- *spread* (E3): how much each grain's pitch wanders from that, up to an octave. Past the middle,
+- _spread_ (E3): how much each grain's pitch wanders from that, up to an octave. Past the middle,
   some grains also play backwards.
-- K3 *flip*: most grains play backwards (K3 again turns them around).
-- variety, *scale*: octaves, fifths, major, minor, chromatic, or free (no snapping).
-- hold K2 + E3, *heads apart*: with more than one head, each plays the next note of the scale up
+- K3 _flip_: most grains play backwards (K3 again turns them around).
+- variety, _scale_: octaves, fifths, major, minor, chromatic, or free (no snapping).
+- hold K2 + E3, _heads apart_: with more than one head, each plays the next note of the scale up
   from the one before it: in unison, or one to four steps of the scale apart (a chord, in major or
   minor). Free counts semitones; nothing goes more than two octaves above the first head.
 
 **tone**: the color of the sound.
-- *color* (E2): one filter knob, like a DJ mixer's. The middle is open. Turn left and a low-pass
+
+- _color_ (E2): one filter knob, like a DJ mixer's. The middle is open. Turn left and a low-pass
   closes, darker and muffled. Turn right and a high-pass opens, thinner. It rings more toward
   either end.
-- *drive* (E3): saturation, from clean to crunchy.
-- K3 *fade*: like a shortwave signal fading: for a moment the sound sinks and darkens, then
+- _drive_ (E3): saturation, from clean to crunchy.
+- K3 _fade_: like a shortwave signal fading: for a moment the sound sinks and darkens, then
   comes back.
-- variety, *media*: what the sound passes through, after Beads: digital (clean), vintage (a
+- variety, _media_: what the sound passes through, after Beads: digital (clean), vintage (a
   lo-fi sampler), clean tape, dirty tape.
 
 **air**: the space around it, and the final mix.
-- *space* (E2): how much of the grains goes to the reverb, and how big the room is.
-- *mix* (E3): left is the radio alone, as it plays; right is the grains alone; between them, both.
-- K3 *haze*: hold the reverb's tail so it hangs on (K3 again lets it go).
 
-**The wind** picks the next station: a *breeze* drifts to one of the nearest, a *trade wind*
-carries on along one bearing, an *eddy* wanders, a *gust* goes anywhere, the *far side* jumps to
+- _space_ (E2): how much of the grains goes to the reverb, and how big the room is.
+- _mix_ (E3): left is the radio alone, as it plays; right is the grains alone; between them, both.
+- K3 _haze_: hold the reverb's tail so it hangs on (K3 again lets it go).
+
+**The wind** picks the next station: a _breeze_ hops off in any direction, a _trade wind_
+carries on along one bearing, an _eddy_ wanders, a _gust_ goes anywhere, the _far side_ jumps to
 the other side of the world and back. While the next station loads, the last one keeps playing. Once it's really playing, the two
 crossfade over one pass of the reel, so the head writes the new station over the old a little
-more each moment and the grains travel from one place to the other. (In PARAMS, *handover* can
-instead press the reel while tuning and crossfade quickly, and *static while tuning* adds some
+more each moment and the grains travel from one place to the other. (In PARAMS, _handover_ can
+instead press the reel while tuning and crossfade quickly, and _static while tuning_ adds some
 hiss.) A station that doesn't play in time is skipped. Its name and place show as you arrive (and on a K1 peek).
 
 The screen has two halves. On the left, the globe: every station is a dot, the one playing is at
@@ -178,7 +184,7 @@ pollen is made by [Voltage Foundry Modular](https://vfmod.com). © 2026 Voltage 
 
 - [ ] the engine loads and sounds; CPU on a CM3 with the densest grains and the radio playing
 - [ ] mpv into SuperCollider over JACK: `jack_lsp -c` while a station plays should show
-  `pollen_a:out_0 -> SuperCollider:in_1` (`P.JACK_TO` in `lib/player.lua` if the names differ)
+      `pollen_a:out_0 -> SuperCollider:in_1` (`P.JACK_TO` in `lib/player.lua` if the names differ)
 - [ ] mpv's CPU with two players, and how long a station takes to start
 - [ ] the first fetch and parse of the stations on a norns (about 2 MB of JSON)
 - [ ] tune the macros by ear (`lib/sound.lua`)
