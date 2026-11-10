@@ -3,7 +3,7 @@
 🌾 The world's radio, carried on the wind, scattered as grains. A live granular instrument for
 [monome norns](https://monome.org/docs/norns/).
 
-**[Try it in your browser](https://carlosedp.github.io/pollen/)**: the real script, on
+**[Try it in your browser](https://pollen.glassgarden.cc/)**: the real script, on
 [norns-web](https://github.com/carlosedp/norns-web).
 
 Pollen grains and radio waves both cross the planet through the sky and land far from where they
