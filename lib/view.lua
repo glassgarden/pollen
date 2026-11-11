@@ -16,7 +16,14 @@
 -- (the tape: a level 0..1 for each of #wave segments of the reel), heads, hgap (s apart),
 -- hp (each head's semitones above the first, by head 1..3), amp (what's being written
 -- now), stations, here (the station playing), seeking (the one being tried), trail (the last
--- stations, oldest first).
+-- stations, oldest first); focus (the part E1 is on) and fs (0..1: how freshly it was picked or
+-- turned), pace, reach_km, mix, scale (its steps, nil for free) and pitch (semitones).
+--
+-- Each part has its piece of the picture, and the part in focus lights it while the rest dims for
+-- a moment: wind the globe (and its reach, a ring as far as a move goes), catch the tape, its
+-- head and brackets, scatter and tint the grains (tint: the scale's notes as ticks beside the
+-- tape), tone the waveform, air the haze. The wind's pace drifts faint streaks over the globe;
+-- the mix leans the brightness from the station's waves (the radio) to the grains.
 
 local V = {}
 
@@ -42,15 +49,16 @@ for i = 1, 60 do haze[i] = { x = random(), y = random(), tw = random() * TAU } e
 
 local dots, rects = {}, {}
 for l = 0, 15 do dots[l], rects[l] = {}, {} end
+local gain = 1 -- the brightness of the piece being drawn (see lit())
 local function px(x, y, l)
-  l = floor(l + 0.5)
+  l = floor(l * gain + 0.5)
   if l < 1 or x < 0 or x >= 128 or y < 0 or y >= 64 then return end
   local b = dots[min(15, l)]
   b[#b + 1] = floor(x)
   b[#b + 1] = floor(y)
 end
 local function rect(x, y, w, h, l)
-  l = floor(l + 0.5)
+  l = floor(l * gain + 0.5)
   if l < 1 then return end
   local b = rects[min(15, l)]
   b[#b + 1] = floor(x); b[#b + 1] = floor(y); b[#b + 1] = w; b[#b + 1] = h
@@ -75,6 +83,23 @@ local function flush()
     end
   end
 end
+
+-- each part's pieces of the picture: lit while it's in focus, the others dimmed
+-- (how much brighter: the haze's faint dots and the sparse grains need more lift to be seen)
+local LIT = {
+  wind = { globe = 1.35 }, catch = { wave = 1.35, head = 1.35, bracket = 1.35 },
+  scatter = { grains = 1.8 }, tint = { grains = 1.8 }, tone = { wave = 1.35 }, air = { haze = 2.6 },
+}
+local function lit(st, piece)
+  local fs = st.fs or 0
+  if fs <= 0 then return 1 end
+  local up = (LIT[st.focus] or {})[piece]
+  return up and 1 + (up - 1) * fs or 1 - 0.6 * fs
+end
+
+-- the wind's streaks: where each crosses the globe, and how long it is
+local streaks = {}
+for i = 1, 7 do streaks[i] = { y = (i - 0.5) / 7 + (random() - 0.5) * 0.08, ph = random(), len = 2 + random(3) } end
 
 -- ---------- the globe ----------
 
@@ -184,16 +209,53 @@ local function waves(x, y, loud)
   end
 end
 
+-- the ring a move can reach: every point reach_km from the station, as far round the globe as it shows
+local function draw_reach(st, here)
+  local d, l = (st.reach_km or 0) / 6371, 2 + 6 * st.fs
+  local p1, l1 = rad(here.lat), rad(here.lon)
+  local n = 56
+  for i = 0, n - 1, 2 do
+    local b = TAU * i / n
+    local p2 = asin(sin(p1) * cos(d) + cos(p1) * sin(d) * cos(b))
+    local l2 = l1 + atan(sin(b) * sin(d) * cos(p1), cos(d) - sin(p1) * sin(p2))
+    local x, y, z = project(deg(p2), deg(l2))
+    if z > 0 then px(x, y, l) end
+  end
+end
+
+-- the wind's pace: faint streaks drifting across the globe, quicker with pace; none when it's still
+local function draw_streaks(st)
+  if (st.pace or 0) <= 0 then return end
+  local speed, l = 0.04 + st.pace * 0.5, 1 + ((st.focus == "wind") and 3 * st.fs or 0)
+  for _, s in ipairs(streaks) do
+    local x0 = GX - GR + ((s.ph + t * speed) % 1) * 2 * GR
+    local y = GY - GR + s.y * 2 * GR
+    for k = 0, s.len - 1 do
+      local x = x0 + k
+      local dx, dy = x - GX, y - GY
+      if dx * dx + dy * dy < (GR - 2) ^ 2 then px(x, y, l) end
+    end
+  end
+end
+
 local function draw_globe(st)
+  gain = lit(st, "globe")
   for _, p in ipairs(rim) do px(p[1], p[2], 2) end
   for _, c in ipairs(globe_pixels(st.stations)) do px(c[1], c[2], c[3]) end
   local trail = st.trail or {}
   for i = 2, #trail do draw_path(trail[i - 1], trail[i], 1 + 4 * (i - 1) / max(1, #trail - 1)) end
+  draw_streaks(st)
   local here = st.here
+  if here and st.focus == "wind" and (st.fs or 0) > 0 then draw_reach(st, here) end
   if here then
     local x, y, z = project(here.lat, here.lon)
     if z > 0 then
-      if not st.seeking then waves(x, y, st.loud) end
+      if not st.seeking then -- the radio's own sound: brighter the more of it the mix lets through
+        local g = gain
+        gain = g * (0.6 + 0.6 * (1 - (st.mix or 0.5)))
+        waves(x, y, st.loud)
+        gain = g
+      end
       rect(x - 1, y - 1, 3, 3, st.seeking and 8 or 15)
     end
   end
@@ -247,6 +309,7 @@ local function draw_tape(st)
   end
 
   -- the haze of the reverb, over the tape
+  gain = lit(st, "haze")
   for i = 1, floor(st.space * #haze) do
     local h = haze[i]
     local x = 60 + ((h.x + (st.hazed and 0 or t * 0.01)) % 1) * 66
@@ -259,6 +322,7 @@ local function draw_tape(st)
   -- caught yet is a faint dotted line. Pressed, it's all evenly lit and the head stops.
   local n = #st.wave
   local headf, filled = st.head / st.reel, st.filled / st.reel
+  gain = lit(st, "wave")
   for i = 0, n - 1 do
     local f = (i + 0.5) / n
     local x = X0 + i + ox
@@ -271,11 +335,13 @@ local function draw_tape(st)
     end
   end
   -- the head
+  gain = lit(st, "head")
   local hx = tape_x(headf, n) + ox
   rect(hx, TY - HMAX - 3, 1, 2 * HMAX + 7, st.frozen and 9 or 15)
   -- the window the grains are read from: a bracket under the tape, behind the head by position
   local y = TY + HMAX + 4
   -- (one for each head, the first brightest)
+  gain = lit(st, "bracket")
   local w = max(2, st.pos_spread * n)
   for h = 0, (st.heads or 1) - 1 do
     local to = headf - (st.age + h * (st.hgap or 0)) / st.reel
@@ -285,7 +351,27 @@ local function draw_tape(st)
     P(tape_x(to - w / n, n), y - 1, l)
   end
 
-  -- the grains; the filter dims them as it closes, drive shakes them
+  -- the scale, while tint is in focus: a tick beside the tape for each of its notes in reach
+  -- (two octaves either way), the pitch the grains play brightest; free is a faint line
+  if st.focus == "tint" and (st.fs or 0) > 0 then
+    gain = 1
+    local function y_of(semis) return TY - semis * 20 / 24 end
+    if st.scale then
+      for oct = -2, 2 do
+        for _, step in ipairs(st.scale) do
+          local semis = oct * 12 + step
+          if semis >= -24 and semis <= 24 then px(127, y_of(semis), (2 + 4 * st.fs) * (step == 0 and 1.4 or 1)) end
+        end
+      end
+    else
+      for semis = -24, 24, 2 do px(127, y_of(semis), 1 + 2 * st.fs) end
+    end
+    rect(125, y_of(st.pitch or 0), 3, 1, 6 + 9 * st.fs)
+  end
+
+  -- the grains; the filter dims them as it closes, drive shakes them; the mix lets more of them
+  -- through, the more it leans to the grains
+  gain = lit(st, "grains") * (0.7 + 0.45 * (st.mix or 0.5))
   local dim = 1
   if st.color < 0.45 then dim = 0.35 + 0.65 * st.color / 0.45 end
   local j = st.drive * 1.5
@@ -296,6 +382,7 @@ local function draw_tape(st)
     P(x, gy - g.v * 0.08, (1 + 4 * env) * dim * g.bright)
     for k = 0, g.len - 1 do P(x - floor(g.len / 2) + k, gy, (4 + 11 * env) * dim * g.bright) end
   end
+  gain = 1
 end
 
 -- ---------- moving ----------
@@ -375,11 +462,13 @@ function V.draw(st)
   st.loud = min(1, (st.amp or 0) / loudest(st.wave))
   shape(st)
   draw_globe(st)
+  gain = lit(st, "globe") * (0.6 + 0.6 * (1 - (st.mix or 0.5)))
   for _, p in ipairs(flow) do
     local f = p.f * p.f
     px(p.x + (p.tx - p.x) * f, p.y + (p.ty - p.y) * f, 2 + 4 * sin(math.pi * p.f))
   end
   draw_tape(st)
+  gain = 1
   -- the static between stations: snow over everything
   for _ = 1, floor(st.static * 260) do px(random(0, 127), random(0, 63), random(1, 6)) end
   flush()

@@ -340,6 +340,21 @@ there, upward when they play forwards and downward when backwards, faster the hi
 pitched. Silence throws none. Pressed, the head stops and the whole tape holds evenly lit. The
 haze over it is the reverb.
 
+**Each part has its piece of the picture.** When you pick a part or turn its knobs, its piece
+lights up and the rest dims for a moment, so you can see what you're changing:
+
+- **wind** lights the globe, and draws a dotted ring around the station as far as a move can
+  reach. While the wind has a pace, faint streaks drift across the globe, quicker the shorter
+  the pace.
+- **catch** lights the tape, the head and the brackets.
+- **scatter** lights the grains.
+- **tint** lights the grains too, and shows the scale as ticks down the right edge (two octaves
+  either way, the root brighter), with a mark where the grains are pitched. Free is a faint
+  line.
+- **tone** lights the waveform.
+- **air** lights the haze. The mix also leans the picture: toward the radio, the station's waves
+  on the globe grow brighter; toward the grains, the grains do.
+
 The station's name and place show as you arrive, and on a peek.
 
 ---

@@ -41,10 +41,10 @@ const BASE = { scatter_density: 0.55, scatter_size: 0.35, tint_spread: 0.45, cat
   air_space: 0.45, catch_heads: 2 };
 // the parts, in E1's order, and what each shot sets first (so its picture shows what it does)
 const PARTS = [
-  { name: "wind", set: {} },
+  { name: "wind", set: { wind_pace: 0.5, wind_reach: 0.65 } },
   { name: "catch", set: { catch_heads: 3, catch_position: 0.55 } },
   { name: "scatter", set: { scatter_density: 0.8, scatter_size: 0.25 } },
-  { name: "tint", set: { tint_spread: 0.75, tint_pitch: 0.7 } },
+  { name: "tint", set: { tint_spread: 0.75, tint_pitch: 0.7, tint_scale: 3 } },
   { name: "tone", set: { tone_color: 0.3, tone_drive: 0.4 } },
   { name: "air", set: { air_space: 0.8 } },
 ];

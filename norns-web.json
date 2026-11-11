@@ -93,7 +93,7 @@
       "accent-soft": "#3d3220"
     }
   },
-  "gallery_intro": "Six parts, each a knob pair, a gesture and a variety. Turn E1 to pick the part, E2 and E3 to shape it, K3 for its gesture, and hold K2 while turning E2 for its variety.",
+  "gallery_intro": "Six parts, each a knob pair, a gesture and a variety. Turn E1 to pick the part, E2 and E3 to shape it, K3 for its gesture, and hold K2 while turning E2 for its variety. Hold K1 to see every part's knobs at once.",
   "gallery": [
     {
       "img": "doc/img/wind.png",
@@ -130,12 +130,6 @@
       "title": "air",
       "alt": "The air part: space and mix",
       "text": "The space and the mix. Space: how much goes to the reverb, and how big it is. Mix: the station alone, the grains alone, or both. K3 holds the reverb's haze."
-    },
-    {
-      "img": "doc/img/peek.png",
-      "title": "peek",
-      "alt": "The peek: every part's two knobs as bars, the station at the bottom",
-      "text": "Hold K1 to see every part's knobs at once, and the station you're on. Hold K1 and press K2 to go back to the station before."
     }
   ]
 }

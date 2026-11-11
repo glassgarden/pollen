@@ -135,7 +135,11 @@ laid flat like tape: the waveform of what it caught, with the write head sweepin
 sound brightest behind it; what isn't caught yet is a dotted line). The bracket under the tape is
 where the grains are read from (position). The grains leave the tape from there, up when they play
 forwards and down when backwards, faster the higher they're pitched; silence throws none. Pressed,
-the head stops and the whole tape holds evenly lit. The haze over it is the reverb. Every
+the head stops and the whole tape holds evenly lit. The haze over it is the reverb. Picking a part or turning its knobs lights its piece of the picture for a moment (wind the
+globe, with a ring as far as a move can reach; catch the tape; scatter and tint the grains, tint
+with its scale as ticks beside the tape; tone the waveform; air the haze) and dims the rest. A
+wind with a pace drifts faint streaks over the globe, and the mix leans the brightness from the
+station's waves to the grains. Every
 macro, variety and gesture is also in PARAMS, so it saves with PSETs and can be MIDI-mapped.
 pollen picks up where it left off: the settings are kept on the way out (`last.pset` in its data
 folder, apart from the numbered PSETs) and read at the next start.

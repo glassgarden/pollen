@@ -314,6 +314,10 @@ local function look()
     static = math.max(m("static"), tuning and m("tune_static") or 0),
     wave = wave, amp = amp,
     stations = radio.stations, here = station, seeking = seeking, trail = trail,
+    -- the part in focus (just picked or turned): its piece of the picture lit, the rest dimmed
+    focus = PARTS[part].id, fs = math.min(1, math.max(shown.part, shown.e2, shown.e3, shown.word)),
+    pace = m("wind_pace"), reach_km = W.step_km(m("wind_reach")), mix = m("air_mix"),
+    scale = S.SCALES[m("tint_scale")].steps, pitch = e.pitch,
   }
 end
 
