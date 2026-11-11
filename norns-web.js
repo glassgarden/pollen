@@ -236,12 +236,14 @@
   view.shell = query.get("shell") || view.shell || "shield";
   view.finish = query.get("finish") || view.finish || "alu";
   view.screen = query.get("screen") || view.screen || "yellow"; // the amber of a shield's OLED, by default
+  view.sky = query.get("sky") || view.sky || "moving"; // or "still": the sky drawn once (as with reduced motion)
   function applyView() {
     $("#device").dataset.shell = view.shell;
     $("#device").dataset.finish = view.finish;
     $("#v-shell").value = view.shell;
     $("#v-finish").value = view.finish;
     $("#v-screen").value = view.screen;
+    $("#v-sky").value = view.sky;
     setTint(view.screen);
     try {
       prefs.set("norns-web:view", JSON.stringify(view));
@@ -258,6 +260,12 @@
   $("#v-screen").addEventListener("change", (e) => {
     view.screen = e.target.value;
     applyView();
+  });
+  $("#v-sky").addEventListener("change", (e) => {
+    view.sky = e.target.value;
+    applyView();
+    pageSky.layout(); // both skies again, still or moving (a still one is drawn once, here)
+    fullSky.layout();
   });
   applyView();
   // a hosting plugin's options, as checkboxes in Look
@@ -281,8 +289,16 @@
   // ---------- the night sky behind the device: chunky pixel stars and the ground it stands on ----------
   // Two of them: the page's, behind the device and the buttons, and full screen's, filling the
   // frame. relayoutSky() puts the ground back under the device after it moves or scales.
+  // A script can paint its own scene instead (NornsWeb.sky, from its stand-in's file): layout(view)
+  // when the canvas changes size, draw(g, t, view) on every frame (fps of them a second, default
+  // 8); view holds cols, rows, ground (the row the device stands on), device ({ left, right, top,
+  // bottom }, in the same pixels) and still (reduced motion), one per canvas, and the scene may
+  // keep its own things on it.
+  const scene = () => (window.NornsWeb && window.NornsWeb.sky) || null;
   const PX = 4; // one sky pixel, in CSS pixels
   const still = matchMedia("(prefers-reduced-motion: reduce)");
+  // a still sky: the system asks for less motion, or Look > the background says so
+  const calm = () => still.matches || view.sky === "still";
   // seeded (Park-Miller), so the sky is the same on every visit
   const rand = (seed) => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   function makeSky(box, sky) {
@@ -291,10 +307,16 @@
       ground = 0,
       cols = 0,
       rows = 0;
+    const view = {};
     const draw = (t) => {
+      const sc = scene();
+      if (sc && sc.draw) {
+        try { sc.draw(sg, t, view); } catch (e) { console.error("norns-web sky:", e); }
+        return;
+      }
       sg.clearRect(0, 0, cols, rows);
       for (const s of stars) {
-        const a = s.tw && !still.matches ? s.l * (0.55 + 0.45 * Math.sin((t / 1000) * s.tw + s.ph)) : s.l;
+        const a = s.tw && !calm() ? s.l * (0.55 + 0.45 * Math.sin((t / 1000) * s.tw + s.ph)) : s.l;
         sg.fillStyle = `rgba(201, 208, 202, ${a.toFixed(2)})`;
         sg.fillRect(s.x, s.y, 1, 1);
       }
@@ -322,6 +344,11 @@
       sky.width = cols;
       sky.height = rows;
       ground = Math.round((d.bottom - r.top) / PX); // the device stands on it
+      Object.assign(view, { cols, rows, ground, still: calm(), device: { // where the device stands, in sky pixels
+        left: Math.floor((d.left - r.left) / PX), right: Math.ceil((d.right - r.left) / PX),
+        top: Math.floor((d.top - r.top) / PX), bottom: ground } });
+      const sc = scene();
+      if (sc && sc.layout) try { sc.layout(view); } catch (e) { console.error("norns-web sky:", e); }
       const rnd = rand(7);
       stars = [];
       for (let i = 0; i < (cols * ground) / 260; i++)
@@ -341,9 +368,16 @@
     fullSky = makeSky($("#frame"), $("#full-sky"));
   const relayoutSky = () => (document.body.classList.contains("full") ? fullSky : pageSky).layout();
   {
-    let last = 0;
+    let last = 0,
+      laidOut = null;
     const loop = (t) => {
-      if (t - last > 120 && !still.matches) {
+      const sc = scene();
+      if (sc !== laidOut) { // a scene arrived (or left): both skies take it up
+        laidOut = sc;
+        pageSky.layout();
+        fullSky.layout();
+      }
+      if (t - last > 1000 / ((sc && sc.fps) || 8) - 4 && !calm()) {
         (document.body.classList.contains("full") ? fullSky : pageSky).draw(t);
         last = t;
       }
@@ -391,6 +425,18 @@
   // streams can go through its /proxy (NornsWeb.proxy(url)), so CORS doesn't stop them.
   let fs = null;            // the Lua VM's file system, once it's up (for curl -o, util.make_dir)
   window.NornsWeb.dev = false;
+  // for stand-ins and scenes: a param's value (a number, or undefined), and a file the script
+  // wrote (a string, or null), read from the Lua VM
+  let paramGet = null;
+  window.NornsWeb.param = (id) => {
+    if (!paramGet) return undefined;
+    try { const v = paramGet(String(id)); return typeof v === "number" && Number.isFinite(v) ? v : undefined; }
+    catch (e) { return undefined; }
+  };
+  window.NornsWeb.readFile = (path) => {
+    if (!fs) return null;
+    try { return fs.readFile(String(path), { encoding: "utf8" }); } catch (e) { return null; }
+  };
   window.NornsWeb.proxy = (url) => (window.NornsWeb.dev && /^https?:/.test(url) ? `/proxy?url=${encodeURIComponent(url)}` : url);
   function mkdirs(path) {
     let at = "";
@@ -636,9 +682,29 @@
     nbNotes.set(note, { o, g });
   }
 
+  // norns-web.json's theme as CSS: colors (custom properties without their --) everywhere, dark
+  // over them in dark mode; specific enough to win over the page's own light and dark values.
+  // build.mjs has the same function.
+  function themeCss(t) {
+    const decl = (o) => Object.entries(o || {})
+      .filter(([k, v]) => /^[a-z][a-z0-9-]*$/.test(k) && !/[;{}<>]/.test(String(v)))
+      .map(([k, v]) => `--${k}: ${v};`).join(" ");
+    let css = `:root:root:root { ${decl(t.colors)} }`;
+    if (t.dark) css += ` @media (prefers-color-scheme: dark) { :root:root:not([data-theme="light"]) { ${decl(t.dark)} } }` +
+      ` :root:root[data-theme="dark"] { ${decl(t.dark)} }`;
+    return css;
+  }
+
   // ---------- the script's own page text (norns-web.json): title, intro, links, footer ----------
   // icon and touch_icon are paths in the script (root: where its files are served)
   function showAbout(a, root) {
+    // the script's colors (build.mjs writes them into the page already, so nothing flashes)
+    if (a.theme && !$("#nw-theme")) {
+      const st = document.createElement("style");
+      st.id = "nw-theme";
+      st.textContent = themeCss(a.theme);
+      document.head.append(st);
+    }
     if (a.title) {
       $("#script-name").textContent = a.title;
       document.title = a.title;
@@ -968,6 +1034,7 @@
     lua = await factory.createEngine();
     fs = (await factory.getLuaModule()).module.FS;
     window.NornsWeb.dev = !!dev;
+    window.NornsWeb.data = `/data/${name}/`; // norns.state.data, where the script keeps its files
     lua.global.set("js_bridge", {
       system_cmd: (id, cmd) => {
         runSystemCmd(String(cmd)).then((out) => lua.global.get("norns_web").system_cmd_done(id, out));
@@ -1000,6 +1067,7 @@
     keyFn = nw("key");
     paramsJson = nw("params_json");
     paramDelta = nw("param_delta");
+    paramGet = nw("param_get");
     replFn = nw("repl");
     psetFn = nw("pset");
     if (dev) liveReload();

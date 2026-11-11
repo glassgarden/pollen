@@ -376,6 +376,11 @@ function norns_web.params_json()
   return "[" .. table.concat(out, ",") .. "]"
 end
 function norns_web.param_delta(i, d) P:delta(i, d) end
+-- a param's value by id, for the page's stand-ins and scenes (nil if there's no such param)
+function norns_web.param_get(id)
+  local ok, v = pcall(P.get, P, id)
+  if ok and type(v) == "number" then return v end
+end
 function norns_web.pset(action, n)
   local ok, err = pcall(action == "save" and P.write or P.read, P, n)
   if not ok then js.error(tostring(err)) end
@@ -506,15 +511,24 @@ engine = setmetatable({}, {
 _path = { code = "/code/", dust = "/dust/", data = "/data/", audio = "/audio/" }
 -- norns.system_cmd: run by the page (js.system_cmd: the stand-in's system_cmd, else a built-in
 -- curl on fetch, else logged); the output comes back later through norns_web.system_cmd_done,
--- as norns' own runs in the background. Without the page's help it's logged and answers "".
-local pending_cmds, next_cmd = {}, 0
+-- as norns' own runs in the background. Like norns' (lua/core/norns.lua), one at a time: a
+-- command waits for the ones before it to finish, so a slow one holds up the rest here too.
+-- Without the page's help it's logged and answers "".
+local cmd_queue, cmd_busy, next_cmd = {}, false, 0
+local function run_next_cmd()
+  local c = cmd_queue[1]
+  if not c then cmd_busy = false; return end
+  cmd_busy = true
+  next_cmd = next_cmd + 1
+  c.id = next_cmd
+  js.system_cmd(c.id, c.cmd)
+end
 norns = {
   state = {}, version = { update = "norns-web" },
   system_cmd = function(cmd, cb)
     if js.system_cmd then
-      next_cmd = next_cmd + 1
-      pending_cmds[next_cmd] = cb or false
-      js.system_cmd(next_cmd, cmd)
+      cmd_queue[#cmd_queue + 1] = { cmd = cmd, cb = cb }
+      if not cmd_busy then run_next_cmd() end
     else
       print("system_cmd (not run in the browser): " .. cmd)
       if cb then cb("") end
@@ -522,6 +536,17 @@ norns = {
   end,
   enc = { sens = function() end, accel = function() end },
   none = function() end,
+  -- the system menu: never open here (a quick K1 tap isn't a menu in the browser); enough for
+  -- libraries that take the screen over and give it back (norns-deps' installer)
+  menu = {
+    status = function() return false end, init = function() end, set = function() end,
+    get_enc = function() end, get_key = function() end,
+    get_redraw = function() end, get_refresh = function() end,
+  },
+  -- the running script: its redraw, as norns keeps it; load() can't swap scripts here
+  script = {
+    load = function(path) print("norns-web: norns.script.load(" .. tostring(path) .. ") is not supported; reload the page") end,
+  },
 }
 function include(file)
   for _, base in ipairs({ norns.state.path, _path.code }) do
@@ -647,9 +672,12 @@ function norns_web.repl(code)
 end
 
 function norns_web.system_cmd_done(id, out)
-  local cb = pending_cmds[id]
-  pending_cmds[id] = nil
-  if cb then guarded(cb, out or "") end
+  local c = cmd_queue[1]
+  if not c or c.id ~= id then return end
+  table.remove(cmd_queue, 1)
+  -- (a command the callback runs queues behind the next one, as on norns)
+  if c.cb then guarded(c.cb, out or "") end
+  run_next_cmd()
 end
 function norns_web.enc(n, d) if enc then guarded(enc, n, d) end end
 function norns_web.key(n, z) if key then guarded(key, n, z) end end

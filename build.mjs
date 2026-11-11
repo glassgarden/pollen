@@ -33,7 +33,6 @@ if (cdn) {
     fs.copyFileSync(path.join(here, "vendor/wasmoon", f), path.join(out, "vendor/wasmoon", f));
   }
 }
-fs.writeFileSync(path.join(out, "index.html"), page);
 const libDir = path.join(scriptDir, "lib");
 for (const f of fs.existsSync(libDir) ? fs.readdirSync(libDir) : []) {
   if (/^Engine_.*\.js$/.test(f)) fs.copyFileSync(path.join(libDir, f), path.join(out, "script/lib", f));
@@ -42,6 +41,33 @@ for (const f of fs.existsSync(libDir) ? fs.readdirSync(libDir) : []) {
     fs.cpSync(files, path.join(out, "script/lib", path.basename(files)), { recursive: true });
 }
 const m = manifest(scriptDir, "script/", [out]);
+// the script's colors, in the page itself so it doesn't flash norns-web's first (as norns-web.js's themeCss)
+if (m.about?.theme) {
+  const t = m.about.theme;
+  const decl = (o) => Object.entries(o || {})
+    .filter(([k, v]) => /^[a-z][a-z0-9-]*$/.test(k) && !/[;{}<>]/.test(String(v)))
+    .map(([k, v]) => `--${k}: ${v};`).join(" ");
+  let css = `:root:root:root { ${decl(t.colors)} }`;
+  if (t.dark) css += ` @media (prefers-color-scheme: dark) { :root:root:not([data-theme="light"]) { ${decl(t.dark)} } }` +
+    ` :root:root[data-theme="dark"] { ${decl(t.dark)} }`;
+  page = page.replace("</head>", `<style id="nw-theme">${css}</style>\n</head>`);
+}
+// the script's Google Analytics tag (norns-web.json "analytics": a measurement id), only in a build:
+// not on the dev server, nor in a plugin's face
+const ga = m.about?.analytics;
+if (ga && /^G-[A-Z0-9]+$/.test(ga)) {
+  page = page.replace("<head>", `<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=${ga}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', '${ga}');
+  </script>
+`);
+} else if (ga) console.warn(`norns-web: analytics "${ga}" isn't a Google Analytics measurement id (G-...), left out`);
+fs.writeFileSync(path.join(out, "index.html"), page);
 for (const f of [m.about?.icon, m.about?.touch_icon, ...(m.about?.gallery || []).map(g => g.img)].filter(Boolean)) {   // the page's icons and pictures (norns-web.json)
   fs.mkdirSync(path.dirname(path.join(out, "script", f)), { recursive: true });
   fs.copyFileSync(path.join(scriptDir, f), path.join(out, "script", f));
