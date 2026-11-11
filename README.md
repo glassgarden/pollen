@@ -6,6 +6,9 @@
 **[Try it in your browser](https://pollen.glassgarden.cc/)**: the real script, on
 [norns-web](https://github.com/carlosedp/norns-web).
 
+**[Read the manual](https://github.com/glassgarden/pollen/blob/main/doc/MANUAL.md)** for how to play it, part by part
+(also as a [PDF](https://raw.githubusercontent.com/glassgarden/pollen/main/doc/pollen-manual.pdf)).
+
 Pollen grains and radio waves both cross the planet through the sky and land far from where they
 started. pollen will tune into live radio stations around the globe, wander from one to the next on
 the wind, and catch each one on a reel that it scatters as grains, in the spirit of Make Noise
@@ -25,9 +28,17 @@ From the maiden REPL:
 ;install https://github.com/glassgarden/pollen
 ```
 
-The radio needs **mpv** and **socat** on the norns (over ssh: `sudo apt install -y mpv socat`;
-mpv brings its ffmpeg libraries along). Without them pollen still plays, on the norns input, and
-the screen says what's missing. mi-UGens are optional: with them, the reverb is MiVerb, the reverb
+The radio needs **mpv** and **socat** on the norns. The first time pollen opens without them, a
+screen lists them with their sizes and **K3 installs both** (through
+[norns-deps](https://github.com/vehka/norns-deps); mpv brings its ffmpeg libraries along); then
+pollen starts again with the radio. K2 says "not now": pollen plays the norns input instead, and
+**PARAMS > radio > install mpv and socat** offers them again.
+
+**To uninstall them**, use **PARAMS > radio > remove mpv and socat** before deleting pollen: it
+removes exactly what pollen installed (a copy that was already there is left alone). The
+libraries mpv brought along stay; `sudo apt autoremove` over ssh takes those too (read its list
+first). By hand, instead: `sudo apt install -y --no-install-recommends mpv socat`, and `sudo apt
+remove mpv socat`. mi-UGens are optional: with them, the reverb is MiVerb, the reverb
 from Clouds and Rings; without them, FreeVerb2.
 
 ## Controls
@@ -43,7 +54,7 @@ from Clouds and Rings; without them, FreeVerb2.
 | hold K1 + K2 | back to the station before                                                                                                 |
 
 Each part has two macros (E2 on the left, E3 on the right), a gesture (K3) and a variety (hold
-K2, turn E2). The bars beside the names show where each macro is.
+K2, turn E2). The small squares along the top right of the screen show which part E1 is on. The bars beside the names show where each macro is.
 
 **wind**: when and where the radio moves to the next station.
 
@@ -137,6 +148,7 @@ lib/sound.lua            every macro -> engine parameter mapping (where the soun
 lib/view.lua             the screen: the globe and the stations, the tape and the grains
 lib/radio.lua            the radio: tuning a station (press, static, load, crossfade, release)
 lib/stations.lua         the stations, from radio-browser.info, cached on the norns
+lib/needs.lua            mpv and socat: the install and remove screens (lib/deps/: norns-deps, vendored)
 lib/player.lua           two mpv players, over JACK into the engine, driven through socat
 lib/walker.lua           the wind: where to go next (great circles, nearest, antipodes)
 lib/json.lua             JSON, decode and encode
@@ -173,6 +185,8 @@ pollen is made by [glassgarden.](https://glassgarden.cc). © 2026 glassgarden. /
   [mi-UGens](https://github.com/v7b1/mi-UGens) (GPL-3.0); the browser carries it as WebAssembly,
   built by [norns-mi-UGens](https://github.com/glassgarden/norns-mi-UGens) (`lib/Engine_Pollen/BUILDINFO`).
 - [wasmoon](https://github.com/ceifa/wasmoon) (MIT) is vendored in `tools/norns-web`.
+- [norns-deps](https://github.com/vehka/norns-deps) (MIT, by vehka) is vendored in `lib/deps.lua`
+  and `lib/deps/`; it installs and removes mpv and socat.
 - **The stations** come from [radio-browser.info](https://www.radio-browser.info), a community
   database; pollen fetches its list at most once a week and identifies itself when it does. The
   streams are the stations' own; pollen plays them live and never redistributes them.
@@ -181,6 +195,9 @@ pollen is made by [glassgarden.](https://glassgarden.cc). © 2026 glassgarden. /
   endorsement is implied.
 
 ## To do on hardware
+
+- [ ] the install screen: mpv and socat from a fresh norns (how big mpv really is with
+      `--no-install-recommends`, for its `size` in `lib/needs.lua`), then remove them again
 
 - [ ] the engine loads and sounds; CPU on a CM3 with the densest grains and the radio playing
 - [ ] mpv into SuperCollider over JACK: `jack_lsp -c` while a station plays should show

@@ -9,6 +9,7 @@
 --   R.init(hooks)   hooks: tuning(on) (press/static while moving), seeking(station) (the one
 --                   being tried), arrived(station),
 --                   status(text), settings() -> { kind, reach, xfade, timeout, settle, volume }
+--                   Returns false when mpv or socat is missing (pollen plays the input).
 --   R.drift()       move on with the wind (ignored while already moving, or refreshing)
 --   R.refresh()     fetch the stations again (after the move, if one is on)
 --   R.back()        back to the station before (history)
@@ -137,9 +138,9 @@ function R.init(h)
   local ok, missing = Player.available()
   if not ok then
     set_status("needs " .. table.concat(missing, " and "))
-    print("pollen: the radio needs " .. table.concat(missing, " and ") .. ". Over ssh (ssh we@norns.local): "
-      .. "sudo apt install -y " .. table.concat(missing, " ") .. " -- until then, pollen plays the input.")
-    return
+    print("pollen: the radio needs " .. table.concat(missing, " and ") .. ": the install screen offers them"
+      .. " (or over ssh: sudo apt install -y " .. table.concat(missing, " ") .. "). Until then, pollen plays the input.")
+    return false
   end
   Player.launch()
   set_status("gathering")
@@ -156,6 +157,7 @@ function R.init(h)
       move()
     end)
   end)
+  return true
 end
 
 -- fetch the stations again; while a move is on, once it ends (see refreshing, above)

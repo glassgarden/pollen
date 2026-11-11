@@ -1,15 +1,15 @@
 # pollen
 
 A norns script: live radio from around the globe, caught on a reel and scattered as grains. The
-idea, vocabulary and decisions are in docs/DESIGN.md (read it before changing behavior); the
-plumbing (backends, mpv, JACK, walker) is docs/SPEC.md. README.md is the player's view.
+idea, vocabulary and decisions are in doc/DESIGN.md (read it before changing behavior); the
+plumbing (backends, mpv, JACK, walker) is doc/SPEC.md. README.md is the player's view.
 
 **Status:** v0.2, in development. The radio plays: radio-browser stations (`lib/stations.lua`,
 cached), two mpv players over JACK (`lib/player.lua`), the wind (`lib/walker.lua`) and the tuning
 sequence (`lib/radio.lua`); six parts (wind, catch, scatter, tint, tone, air) drive the reel engine.
 The screen (`lib/view.lua`) is the globe on the left and the reel as tape on the right. In the
-browser the same Lua tunes real stations (the stand-in plays mpv's part). Not yet: Radio Garden,
-the seed vault, norns-deps for installing mpv/socat, crow/grid.
+browser the same Lua tunes real stations (the stand-in plays mpv's part). mpv and socat install and
+uninstall through norns-deps (`lib/needs.lua`). Not yet: Radio Garden, the seed vault, crow/grid.
 Never run on a norns: the Lua passes the smoke test; the engine passes `make test-sc` on scsynth
 3.13 (with the FreeVerb2 fallback: MiVerb is untested in SuperCollider).
 
@@ -44,6 +44,9 @@ make web       # the real script in a browser at http://localhost:8800/
   shape must be answered by `Engine_Pollen.js`'s `system_cmd()` (mpv, socat; curl is
   norns-web's) and by the fake mpv in `test/smoke.lua`, or the browser and the test break.
   `lib/radio.lua` is stateful: include it only from `pollen.lua`.
+- **`lib/deps.lua` and `lib/deps/` are norns-deps, vendored** (MIT; `lib/deps/VENDORED`): change
+  them only to fix them, note it there and send it upstream. `lib/needs.lua` loads them only when
+  a screen opens: they probe the machine (`io.popen`) as they load, which the browser can't.
 - **`norns.system_cmd` is one queue:** each command waits for the one before it to finish
   (norns-web queues them the same way). A slow command (curl, up to 30 s) holds up every mpv
   command behind it, so a refresh and a move never overlap (`lib/radio.lua`).

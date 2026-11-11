@@ -30,6 +30,7 @@ engine.name = "Pollen"
 local S = include("lib/sound")
 local view = include("lib/view")
 local radio = include("lib/radio")
+local needs = include("lib/needs") -- mpv and socat: installed and removed through norns-deps
 local W = include("lib/walker")
 
 local FPS = 15
@@ -119,6 +120,7 @@ local function send()
 end
 
 local function say(w) word, shown.word = w, 1.2 end
+local touch_t = 0 -- when an encoder or key was last touched (the part's squares fade when left alone)
 
 -- a level from the engine: onto the segment under the head, and any the head skipped since
 -- (a few at most: a head that jumps, as when the engine's head poll corrects the mirror, just
@@ -142,6 +144,27 @@ local function catch_level(a)
 end
 
 -- ---------- params ----------
+
+-- the install screen for what the radio needs; once something is installed, the script starts again
+-- (whether the radio plays is decided at init)
+local function install_radio()
+  if #needs.missing() == 0 then say("installed") return end
+  needs.install(function(installed)
+    if installed then norns.script.load(norns.state.script) end
+  end)
+end
+
+-- the remove screen for what pollen installed; the radio stops once they're gone
+local function remove_radio()
+  if not needs.installed() then say("nothing to remove") return end
+  needs.remove(function(ok)
+    if ok then
+      radio.cleanup()
+      status = "needs mpv and socat"
+      print("pollen: mpv and socat removed (what pollen installed); pollen plays the input")
+    end
+  end)
+end
 
 local function add_params()
   local macro_spec = function(d) return controlspec.new(0, 1, "lin", 0, d, "", 0.01) end
@@ -195,7 +218,7 @@ local function add_params()
       params:set_action(P.hold, send)
     end
   end
-  params:add_group("pollen_radio", "radio", 5)
+  params:add_group("pollen_radio", "radio", 7)
   -- how a new station comes in: blended over the reel (crossfaded over one pass of the head, so
   -- the reel turns from the old station to the new as it's written over), or with the reel
   -- pressed while it loads and then a quick crossfade
@@ -205,6 +228,12 @@ local function add_params()
   params:add_control("timeout", "give a station", controlspec.new(4, 30, "lin", 0, 10, "s", 0.01))
   params:add_trigger("refresh", "refresh the stations")
   params:set_action("refresh", function() radio.refresh() end)
+  -- what the radio needs: installed (the screen again, after a "not now"), and taken away again
+  -- (only what pollen installed, as norns-deps' manifest has it)
+  params:add_trigger("radio_install", "install mpv and socat")
+  params:set_action("radio_install", function() install_radio() end)
+  params:add_trigger("radio_remove", "remove mpv and socat")
+  params:set_action("radio_remove", function() remove_radio() end)
   params:add_group("pollen_levels", "levels", 4)
   params:add_control("level", "level", controlspec.new(-60, 6, "lin", 0, 0, "dB", 0.01))
   params:set_action("level", send)
@@ -224,6 +253,7 @@ end
 -- ---------- controls ----------
 
 function enc(n, d)
+  touch_t = util.time()
   local P = PARTS[part]
   if n == 1 then
     part = util.clamp(part + d, 1, #PARTS)
@@ -260,6 +290,7 @@ local function gesture(P)
 end
 
 function key(n, z)
+  touch_t = util.time()
   held[n] = z == 1
   if n == 2 and z == 1 and held[1] then -- hold K1 + K2: back to the station before
     if radio.back() then say("back") end
@@ -333,6 +364,22 @@ local function draw_macro(P, k, f)
   screen.fill()
 end
 
+-- which part E1 is on, as terrarium shows it: a small square for each part along the top right
+-- (over the station's name), the part's brighter, brightest while a knob turns. Left alone for a
+-- minute they fade out, so nothing stays lit on the OLED for hours
+local function draw_parts()
+  local focus = shown.part > 0 or shown.e2 > 0 or shown.e3 > 0
+  local idle = util.clamp((util.time() - touch_t - 60) / 3, 0, 1)
+  for i = 1, #PARTS do
+    local l = (i == part and (focus and 13 or 5) or (focus and 3 or 1)) * (1 - idle)
+    if l >= 0.5 then
+      screen.level(math.floor(l + 0.5))
+      screen.rect(104 + (i - 1) * 4, 0, 2, 2)
+      screen.fill()
+    end
+  end
+end
+
 -- hold K1: every part and where its two macros are, as bars (no numbers), and the station
 local function draw_peek()
   for i, P in ipairs(PARTS) do
@@ -382,6 +429,7 @@ function redraw()
       local f = math.min(1, math.max(shown["e" .. (k + 1)], shown.part))
       if f > 0 then draw_macro(P, k, f) end
     end
+    draw_parts()
   end
   screen.update()
 end
@@ -404,6 +452,7 @@ local function tick()
 end
 
 function init()
+  touch_t = util.time() -- the part's squares show for the first minute
   add_params()
   params_added = true
   local last = norns.state.data .. LAST
@@ -425,7 +474,7 @@ function init()
   redraw_metro:start()
 
   -- the radio, and the wind's pace on the norns clock
-  radio.init({
+  local radio_ok = radio.init({
     tuning = function(on)
       tuning = on
       if not on then seeking = nil end
@@ -445,6 +494,8 @@ function init()
         timeout = m("timeout"), settle = 1.5, volume = 1 }
     end,
   })
+  -- without mpv or socat: offer them at once (one K3), and start again with the radio once they're in
+  if not radio_ok then clock.run(function() clock.sleep(0.5); install_radio() end) end
   clock.run(function()
     local waited = 0
     while true do

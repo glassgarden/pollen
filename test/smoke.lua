@@ -264,6 +264,36 @@ assert(sets.heads.max == 4 and sets.hp3.max > 0, "the heads and their intervals 
 assert(calls.reel == 11, "reel: expected 11 changes, got " .. tostring(calls.reel))
 assert(calls.clear == 1, "clear the reel didn't reach the engine")
 
+-- what the radio needs (lib/needs.lua, through norns-deps). With mpv and socat there, "install"
+-- opens no screen, and with nothing pollen installed, "remove" opens none either.
+do
+  local own = key
+  params:set("radio_install", 1)
+  params:set("radio_remove", 1)
+  assert(key == own, "install/remove opened a screen with nothing to do")
+  -- the install screen itself, on a pretend norns (nothing asks this machine about itself): it
+  -- takes over the keys, lists what's missing, and K2 ("not now") gives everything back and
+  -- installs nothing
+  local needs = include("lib/needs")
+  needs.DIR = _path.data .. "deps"
+  needs.platform = { arch = "armv7l", desktop = false, norns = true, shield = true, os_id = "debian",
+    os_name = "Debian", pm = "apt", priv = "sudo", home = _path.data }
+  local real = js_bridge.os_capture
+  js_bridge.os_capture = function(cmd) if cmd:match("^command %-v ") then return "" end return real(cmd) end
+  assert(#needs.missing() == 2, "mpv and socat should be missing")
+  local answer
+  needs.install(function(installed) answer = installed end)
+  assert(key ~= own, "the install screen didn't take the keys")
+  run(0.5)
+  key(2, 1); key(2, 0)
+  run(0.5)
+  assert(answer == false, "K2 on the install screen should install nothing")
+  assert(key == own, "the install screen didn't give the keys back")
+  assert(not needs.installed(), "nothing was installed, but there's a manifest")
+  js_bridge.os_capture = real
+end
+ok("radio: install and remove screens")
+
 -- cleanup stops the players
 cleanup()
 assert(killed >= 2, "cleanup didn't stop mpv") -- once at start (leftovers), once now

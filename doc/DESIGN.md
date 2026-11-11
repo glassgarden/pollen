@@ -248,29 +248,28 @@ This replaces SPEC §4.8's three param pages.
 
 ## Dependencies
 
-Use [norns-deps](https://splines.cc/scripts/norns-deps/) (`github.com/vehka/norns-deps`). It checks
-on load, asks on screen before installing, shows progress, and has a manifest to uninstall from,
-which is what SPEC §2 wants (no silent installs).
+[norns-deps](https://splines.cc/scripts/norns-deps/) (`github.com/vehka/norns-deps`, MIT) installs
+and removes them, vendored in `lib/deps.lua` and `lib/deps/` (`lib/deps/VENDORED` says from which
+commit, and the one change made here). `lib/needs.lua` is pollen's side:
 
-```lua
-local deps = include("lib/deps")
-local d = deps.new { name = "pollen", dir = _path.data .. "pollen/deps" }
-d:add { id = "mpv",   label = "mpv",   check = "mpv",   pkg = "mpv",   why = "plays the radio" }
-d:add { id = "socat", label = "socat", check = "socat", pkg = "socat", why = "talks to mpv" }
-d:add { id = "mi",    label = "mi-UGens", check_ugens = "MiVerb",
-        ugens = "https://github.com/glassgarden/norns-mi-UGens/releases/latest/download/mi-UGens-norns.tar.gz",
-        why = "the reverb (optional)" }
-```
-
-- **mpv and socat are required for the radio. mi-UGens are optional:** without them, the air is
-  FreeVerb2.
-- Its repo has no license file, but its author has allowed public use (confirmed with them,
-  October 2026). Vendor it in `lib/deps.lua` with a line saying where it came from, and ask for a
-  license file upstream so the permission is on record. Still to check: how it handles `sudo` on
-  a stock norns, and whether its `ugens` step should defer to our tarball's `install.sh`.
-  That script moves older mi-UGens installs aside, because duplicate classes break sclang. Its
-  `ugen_conflicts()` may cover the same ground.
-- Note the size on the install prompt: mpv brings its ffmpeg libraries along.
+- **mpv and socat, required for the radio.** pollen checks at start (`command -v`, as the radio
+  does); with either missing, the install screen opens by itself: one list with sizes, **K3
+  installs** (apt through `sudo -n`, which norns has; mpv without its recommended packages), then
+  the script loads again with the radio. **K2 is "not now"**: pollen plays the input, and PARAMS >
+  radio > _install mpv and socat_ opens the screen again. No install happens without that K3
+  (SPEC §2: no silent installs). Without a way to get root, the screen shows the command instead.
+- **Uninstall:** norns-deps writes what it installed to a manifest (`data/pollen/deps/`), and PARAMS
+  > radio > _remove mpv and socat_ removes exactly that (`apt-get remove`), never a copy that was
+  there before. Deleting a script runs none of its code, so the docs say to remove them first.
+  The libraries mpv pulled in stay: `apt autoremove` would take them, but it also takes any other
+  orphan, so it's left to the user, with a word of caution.
+- **norns-deps is loaded only when a screen opens.** It asks the machine about itself as it loads
+  (`uname`, apt, sudo, through `io.popen`), which the browser's Lua can't do. In the browser the
+  stand-in answers that mpv is there, so it never loads; the smoke test opens the screen with a
+  pretend norns platform (`needs.platform`).
+- **mi-UGens stay optional and aren't offered.** norns-deps' screen is one decision for the whole
+  list, so an optional reverb would ride along with the radio's install. Without them the air is
+  FreeVerb2; terrarium's installer (or norns-mi-UGens' release) puts them in.
 
 ## The seed vault: radio for offline
 
