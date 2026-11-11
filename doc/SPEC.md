@@ -152,7 +152,7 @@ Live, continuously-recording granulator, Morphagene/Evil Pet flavoured.
 - Polls: input amplitude (stream health), output envelope follower (for crow out), write-head position (for UI).
 - Commands: one `engine.<param>(value)` per parameter; `freeze(0/1)`, `clear()`.
 - CPU budget: cap max grains (e.g. 16–24 on CM3); expose `max_density` param.
-- Evaluate the use of Mutable Instruments engines like Clouds or Beads which have been ported and are available at $HOME/projects/norns-mi-UGens and on GitHub. Even use these modules's Reverb for example.
+- Evaluate the use of Mutable Instruments engines like Clouds or Beads which have been ported and are available at $HOME/projects/mi-UGens and on GitHub. Even use these modules's Reverb for example.
 - The idea is inspired by Evil Pet where one can record a part of a stream and process/manipulate it in real-time, layering and transforming audio creatively.
 
 ### 4.6 Walker (`walker.lua`)
@@ -250,5 +250,5 @@ Save/load psets as normal; favorites saved separately in data dir.
 - mpv on norns via JACK (precedent): <https://github.com/schollz/norns.online>
 - norns scripting reference: <https://monome.org/docs/norns/>
 - Inspiration: Make Noise Morphagene, Endorphin.es Evil Pet
-- mi-UGens: <https://github.com/glassgarden/norns-mi-UGens>
+- mi-UGens: <https://github.com/glassgarden/mi-UGens>
 - terrarium: <https://github.com/glassgarden/terrarium>

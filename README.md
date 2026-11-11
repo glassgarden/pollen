@@ -158,7 +158,7 @@ lib/walker.lua           the wind: where to go next (great circles, nearest, ant
 lib/json.lua             JSON, decode and encode
 lib/Engine_Pollen.sc     the engine: writer -> reel -> grains -> filter, drive, media, reverb, limiter
 lib/Engine_Pollen.js     the same engine for the browser (norns ignores it)
-lib/Engine_Pollen/       MiVerb as WebAssembly (from norns-mi-UGens), and sky.js, the page's field and sky
+lib/Engine_Pollen/       MiVerb as WebAssembly (from mi-UGens), and sky.js, the page's field and sky
 tools/norns-web/         the script in a browser (a git subtree of carlosedp/norns-web)
 test/                    the Lua smoke test, the browser engine's offline render, the engine on scsynth
 docs/                    SPEC.md (the plumbing) and DESIGN.md (the idea and the decisions)
@@ -187,7 +187,7 @@ pollen is made by [glassgarden.](https://glassgarden.cc). © 2026 glassgarden. /
   media stage follows Beads' four. Inspired by Make Noise Morphagene and Endorphin.es Evil Pet.
 - **The reverb**, when installed, is MiVerb from Volker Böhm's
   [mi-UGens](https://github.com/v7b1/mi-UGens) (GPL-3.0); the browser carries it as WebAssembly,
-  built by [norns-mi-UGens](https://github.com/glassgarden/norns-mi-UGens) (`lib/Engine_Pollen/BUILDINFO`).
+  built by [mi-UGens](https://github.com/glassgarden/mi-UGens) (`lib/Engine_Pollen/BUILDINFO`).
 - [wasmoon](https://github.com/ceifa/wasmoon) (MIT) is vendored in `tools/norns-web`.
 - [norns-deps](https://github.com/vehka/norns-deps) (MIT, by vehka) is vendored in `lib/deps.lua`
   and `lib/deps/`; it installs and removes mpv and socat.

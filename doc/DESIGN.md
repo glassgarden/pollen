@@ -23,30 +23,30 @@ The name already tells this story (Radio Garden → garden → pollen), so we ke
 Like terrarium, the code keeps working names and the screen, PARAMS names and manual use the
 garden's names. Users never see "buffer" or "feedback".
 
-| on screen / in the manual | in the code         | what it is                                                |
-| ------------------------- | ------------------- | --------------------------------------------------------- |
-| flower, bloom             | station             | a live stream at a place on the globe                     |
-| the wind                  | walker              | what picks the next station, and how                      |
-| drift                     | station change      | moving to the next flower (the globe turns)               |
-| the reel                  | circular buffer     | the stations you caught, as splices                       |
-| catch                     | record / write head | taking pollen from the current flower                     |
-| press                     | freeze              | a pressed flower: the reel stops recording and keeps it   |
-| scatter                   | grain density, size | how the pollen is thrown                                  |
-| cross-pollinate           | feedback / layering | grains written back into the reel, over the next station  |
+| on screen / in the manual | in the code         | what it is                                                   |
+| ------------------------- | ------------------- | ------------------------------------------------------------ |
+| flower, bloom             | station             | a live stream at a place on the globe                        |
+| the wind                  | walker              | what picks the next station, and how                         |
+| drift                     | station change      | moving to the next flower (the globe turns)                  |
+| the reel                  | circular buffer     | the stations you caught, as splices                          |
+| catch                     | record / write head | taking pollen from the current flower                        |
+| press                     | freeze              | a pressed flower: the reel stops recording and keeps it      |
+| scatter                   | grain density, size | how the pollen is thrown                                     |
+| cross-pollinate           | feedback / layering | grains written back into the reel, over the next station     |
 | static, between flowers   | tuning noise        | the sky's hiss while the wind is moving you (off by default) |
-| the herbarium             | favorites           | flowers you kept (K1 + K3)                                |
-| the seed vault            | offline recordings  | stations kept as files, to play with no network           |
+| the herbarium             | favorites           | flowers you kept (K1 + K3)                                   |
+| the seed vault            | offline recordings  | stations kept as files, to play with no network              |
 
 The macros on screen use plain words where the garden's didn't say what they do: catch's are
-*position* and *feedback* (they were *memory* and *cross*). Played, three things got in the way of
+_position_ and _feedback_ (they were _memory_ and _cross_). Played, three things got in the way of
 hearing what pollen does, so the defaults changed (October 2026):
 
 - **The wind is still by default** (pace at its left: by hand only). Moving on its own every 64
   beats changed the sound faster than you could follow what the grains were doing to it.
 - **The mix starts at the grains alone.** With the radio under them, the grains were hard to hear
   as grains.
-- **No static while tuning by default.** The hiss felt out of place. It stays in PARAMS (*static
-  while tuning*). Tone's K3 was a static burst too, and felt cheesy: it's now a **fade**, a
+- **No static while tuning by default.** The hiss felt out of place. It stays in PARAMS (_static
+  while tuning_). Tone's K3 was a static burst too, and felt cheesy: it's now a **fade**, a
   shortwave signal fading (the level sinks and the low-pass closes for 2.5 s, then both return).
 - **The pace is in minutes** (10, 5, 2, 1, or 30 s), not beats of the clock: a station is
   somewhere to stay a while, not a step in a sequence.
@@ -54,7 +54,7 @@ hearing what pollen does, so the defaults changed (October 2026):
   they crossfade over one pass of the write head. Each moment of the reel is written over with a
   little more of the new station than the last, so the grains travel from one place to the other.
   The pressed handover (the reel held while tuning, a quick crossfade) is the other choice, in
-  PARAMS (*handover*).
+  PARAMS (_handover_).
 
 Drifting is K3 on the wind part only: a K2 tap did the same, and two keys for it was one too many.
 
@@ -113,7 +113,7 @@ Wind kinds (the walk modes from SPEC §4.6, renamed for the screen):
 
 ### Bigger buffers for Clouds and Beads
 
-Their buffers are small because of the STM32's RAM, not the DSP. In the source (norns-mi-UGens
+Their buffers are small because of the STM32's RAM, not the DSP. In the source (mi-UGens
 `work/mi-UGens`):
 
 - **Clouds: easy.** The wrapper (`projects/MiClouds/MiClouds.cpp`) allocates the buffers itself:
@@ -121,7 +121,7 @@ Their buffers are small because of the STM32's RAM, not the DSP. In the source (
   `GranularProcessor::Init(large, size, small, size)`, which splits whatever it gets among the
   channels. 118784 bytes is about 0.9 s of 16-bit stereo at Clouds' 32 kHz, and roughly 2–4× that
   in its mono or lo-fi modes. A larger buffer is a change to that one number, or better, a new UGen
-  input (`bufsize`, a scalar), in our norns-mi-UGens fork. To check by ear: Clouds' position and
+  input (`bufsize`, a scalar), in our mi-UGens fork. To check by ear: Clouds' position and
   size knobs span the whole buffer, so at 30 s they get coarse, and its grain count stays fixed
   (32–40). 8–15 s is probably the sweet spot. The spectral mode's buffers come from the small
   block and don't need to grow.
@@ -130,7 +130,7 @@ Their buffers are small because of the STM32's RAM, not the DSP. In the source (
   fixed when it's compiled: the `DelayLine<resolution, max_delay, …, bank_size = 262144,
 num_banks = 3>` templates, `max_delay`, and the wrapper's `kDelayMemSize = 768 * 1024`. Growing
   it means patching those constants together and rebuilding both the native and the WebAssembly
-  builds. It's doable as a build flag in norns-mi-UGens (`--beads-seconds N`), but it's a fork of
+  builds. It's doable as a build flag in mi-UGens (`--beads-seconds N`), but it's a fork of
   Beads' DSP that has to be listened through.
 
 **Worth it?** A longer Clouds, yes: it's cheap, so it's worth a spike for the _clouds_ species
@@ -202,37 +202,37 @@ brighter), so the land shows where people broadcast from, with a faint graticule
 make it a sphere. Radio-browser's list is heavy on Europe and the Americas, and the globe shows
 that.
 
-| what moves       | how it shows                                                          |
-| ---------------- | --------------------------------------------------------------------- |
-| the reel         | a waveform, stretched between its quietest and loudest (broadcasts are compressed) |
-| the write head   | a bright bar sweeping left to right; the newest sound is brightest behind it |
-| position         | the bracket under the tape: where the grains are read, and how wide   |
-| density          | how many grains leave the tape                                        |
-| size             | how long each grain's dash is, and how long it lives                  |
-| pitch            | how fast they move (lower is slower)                                  |
-| reverse          | backwards grains go down from the tape, forwards ones up              |
-| press (freeze)   | the head stops, the whole tape evenly lit, nothing flows in           |
-| feedback         | grains turn back and land on the tape again                           |
-| air (reverb)     | a haze over the tape                                                  |
+| what moves     | how it shows                                                                       |
+| -------------- | ---------------------------------------------------------------------------------- |
+| the reel       | a waveform, stretched between its quietest and loudest (broadcasts are compressed) |
+| the write head | a bright bar sweeping left to right; the newest sound is brightest behind it       |
+| position       | the bracket under the tape: where the grains are read, and how wide                |
+| density        | how many grains leave the tape                                                     |
+| size           | how long each grain's dash is, and how long it lives                               |
+| pitch          | how fast they move (lower is slower)                                               |
+| reverse        | backwards grains go down from the tape, forwards ones up                           |
+| press (freeze) | the head stops, the whole tape evenly lit, nothing flows in                        |
+| feedback       | grains turn back and land on the tape again                                        |
+| air (reverb)   | a haze over the tape                                                               |
 
 ### Controls (terrarium's grammar)
 
 E1 picks a part. Each part has two macros, and their names show for a moment while you turn them,
 each with a bar for where it is.
 
-| part    | E2 / E3                                  | K3 gesture         | hold K2 + E2 (variety) | hold K2 + E3       |
-| ------- | ---------------------------------------- | ------------------ | ---------------------- | ------------------ |
-| wind    | pace (how often) · reach (how far)       | drift now (the only drift key) | wind kind  |                    |
-| catch   | position (how far back) · feedback       | press / release    | reel length            | heads (1–4)        |
-| scatter | density · size                           | a burst            | envelope shape         |                    |
-| tint    | pitch (in the key) · spread / reverse    | flip direction     | scale                  | heads apart (steps) |
-| tone    | color (one-knob filter) · drive          | a fade             | media                  |                    |
-| air     | space · mix                              | hold the haze      | (none)                 |                    |
+| part    | E2 / E3                               | K3 gesture                     | hold K2 + E2 (variety) | hold K2 + E3        |
+| ------- | ------------------------------------- | ------------------------------ | ---------------------- | ------------------- |
+| wind    | pace (how often) · reach (how far)    | drift now (the only drift key) | wind kind              |                     |
+| catch   | position (how far back) · feedback    | press / release                | reel length            | heads (1–4)         |
+| scatter | density · size                        | a burst                        | envelope shape         |                     |
+| tint    | pitch (in the key) · spread / reverse | flip direction                 | scale                  | heads apart (steps) |
+| tone    | color (one-knob filter) · drive       | a fade                         | media                  |                     |
+| air     | space · mix                           | hold the haze                  | (none)                 |                     |
 
 **Heads.** Up to four read heads, the bees of the reel: each grain picks one at random, so they
 share the density (the CPU follows the grains, not the heads). They sit evenly spread along the
 reel behind the first, which position moves (`hgap` = reel / heads), so the station plays now and
-seconds ago at once, a canon of grains. Tint's *heads apart* puts each one a number of scale steps
+seconds ago at once, a canon of grains. Tint's _heads apart_ puts each one a number of scale steps
 above the one before (`hp1..hp3`, worked out in `lib/sound.lua`, folded down by octaves to stay
 within two of the first), so four heads in major or minor make a chord of the radio. The engine
 takes only the count, the gap and the three offsets.
@@ -260,16 +260,16 @@ commit, and the one change made here). `lib/needs.lua` is pollen's side:
   (SPEC §2: no silent installs). Without a way to get root, the screen shows the command instead.
 - **Uninstall:** norns-deps writes what it installed to a manifest (`data/pollen/deps/`), and PARAMS
   > radio > _remove mpv and socat_ removes exactly that (`apt-get remove`), never a copy that was
-  there before. Deleting a script runs none of its code, so the docs say to remove them first.
-  The libraries mpv pulled in stay: `apt autoremove` would take them, but it also takes any other
-  orphan, so it's left to the user, with a word of caution.
+  > there before. Deleting a script runs none of its code, so the docs say to remove them first.
+  > The libraries mpv pulled in stay: `apt autoremove` would take them, but it also takes any other
+  > orphan, so it's left to the user, with a word of caution.
 - **norns-deps is loaded only when a screen opens.** It asks the machine about itself as it loads
   (`uname`, apt, sudo, through `io.popen`), which the browser's Lua can't do. In the browser the
   stand-in answers that mpv is there, so it never loads; the smoke test opens the screen with a
   pretend norns platform (`needs.platform`).
 - **mi-UGens stay optional and aren't offered.** norns-deps' screen is one decision for the whole
   list, so an optional reverb would ride along with the radio's install. Without them the air is
-  FreeVerb2; terrarium's installer (or norns-mi-UGens' release) puts them in.
+  FreeVerb2; terrarium's installer (or mi-UGens' release) puts them in.
 
 ## The seed vault: radio for offline
 
