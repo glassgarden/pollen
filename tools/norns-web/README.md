@@ -92,7 +92,9 @@ An optional `norns-web.json` next to the script fills in the rest:
   "actions": [{ "label": "Shuffle", "icon": "shuffle", "param": "randomize", "title": "…" }],
   "controls": [{ "keys": "E1", "does": "…" }, { "keys": "hold K1 + K3", "does": "…" }],
   "gallery_intro": "…", "gallery": [{ "img": "doc/a.png", "title": "…", "text": "…", "alt": "…" }],
-  "install": ";install https://github.com/…", "links": [{ "label": "…", "url": "…" }], "footer": "…" }
+  "install": ";install https://github.com/…", "links": [{ "label": "…", "url": "…" }], "footer": "…",
+  "theme": { "colors": { "night": "#1d1b3a", "amber": "#f2c14e", "paper": "#f4ecd8" },
+             "dark": { "paper": "#17152b", "ink": "#ece4d3" } } }
 ```
 
 - `title`, `subtitle`, `about`: the heading and intro over the device. `icon` is the tab's icon and
@@ -108,6 +110,13 @@ An optional `norns-web.json` next to the script fills in the rest:
   package. Hidden in a plugin's face.
 - `more`, `install`, `links`: the About section (the install line has a copy button); `footer`:
   credits or license text.
+- `theme`: the page's colors, so a script's page needn't look like every other. `colors` sets the
+  page's CSS custom properties (named without their `--`, as in `index.html`'s `:root`: `paper`,
+  `surface`, `ink`, `muted`, `rule`, `accent`, `accent-soft` for the page; `night`, `night-2`,
+  `night-ink`, `night-muted`, `night-rule`, `amber`, `amber-hi`, `amber-lo` for the band around the
+  device), in light and dark mode; `dark` sets them again for dark mode. `build.mjs` writes them
+  into the page, so it doesn't flash norns-web's colors first. For the scene behind the device,
+  see `NornsWeb.sky` below.
 
 ## In a plugin (hosted)
 
@@ -176,6 +185,23 @@ NornsWeb.engines.X = () => ({
 A stand-in that needs files of its own (an AudioWorklet module, WebAssembly) keeps them in a
 folder next to it, `lib/Engine_X/`; `build.mjs` copies it along. The stand-in finds it from its
 own URL: `document.currentScript.src.replace(/\.js$/, "/")`, read when the script loads.
+
+The stand-in can read the script's state: `NornsWeb.param(id)` is a param's value (a number, or
+`undefined`), and `NornsWeb.readFile(path)` a file the script wrote (a string, or `null`), such as
+a cache under `norns.state.data` (`NornsWeb.data`, `/data/<name>/`).
+
+Its file can also paint the scene behind the device, in place of the night sky and its ground, by
+setting `NornsWeb.sky`. Both skies (the page's and full screen's) use it, each a canvas of chunky
+pixels (4 CSS pixels each) with a `view` of its own:
+
+```js
+NornsWeb.sky = {
+  fps: 12, // frames a second (default 8; none with reduced motion)
+  layout(view) { /* view.cols, view.rows, view.ground (the row the device stands on),
+                   view.device ({ left, right, top, bottom }), view.still */ },
+  draw(g, t, view) { /* g: the canvas's 2D context, t: ms; clear and paint all of it */ },
+};
+```
 
 Without a stand-in, engine commands are only logged (tick "engine commands" under the log).
 

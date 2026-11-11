@@ -376,6 +376,11 @@ function norns_web.params_json()
   return "[" .. table.concat(out, ",") .. "]"
 end
 function norns_web.param_delta(i, d) P:delta(i, d) end
+-- a param's value by id, for the page's stand-ins and scenes (nil if there's no such param)
+function norns_web.param_get(id)
+  local ok, v = pcall(P.get, P, id)
+  if ok and type(v) == "number" then return v end
+end
 function norns_web.pset(action, n)
   local ok, err = pcall(action == "save" and P.write or P.read, P, n)
   if not ok then js.error(tostring(err)) end
