@@ -81,8 +81,13 @@ Wind kinds (the walk modes from SPEC §4.6, renamed for the screen):
   a pale ink for the land (`#c9d0ca`). It sits next to terrarium's amber screen and earth tones as a
   sibling.
 - **Tagline:** "the world's radio, carried on the wind, scattered as grains."
-- **norns-web page:** the device under a night sky (as terrarium's), with one action button,
-  **Drift**, that sends the wind on.
+- **norns-web page:** the device standing in a field of grain under the sky at the hour it is
+  where the station plays (its sun time, from its longitude): dawn, a blue day, dusk, night with
+  stars. Pollen drifts across on the wind, as fast as the wind's pace and as unsteady as its reach,
+  glowing with what the reel catches; a new station is a gust (the field bends, the pollen lifts,
+  the radio mast on the horizon sends out rings). `lib/Engine_Pollen/sky.js` draws it (norns-web's
+  `NornsWeb.sky`); the page's colors are `theme` in `norns-web.json`: cream and straw by day,
+  dusk violet by night, pollen gold for the accent. One action button, **Drift**, sends the wind on.
 
 ## Sound engine
 

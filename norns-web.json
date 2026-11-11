@@ -56,5 +56,33 @@
       "param": "wind_drift",
       "title": "The wind carries you to another station"
     }
-  ]
+  ],
+  "theme": {
+    "colors": {
+      "paper": "#f4ecd8",
+      "surface": "#fbf6ea",
+      "ink": "#2a2418",
+      "muted": "#6b5f4b",
+      "rule": "#e2d6ba",
+      "accent": "#94570a",
+      "accent-soft": "#f3dfb3",
+      "night": "#1d1b3a",
+      "night-2": "#25223f",
+      "night-ink": "#f3ead8",
+      "night-muted": "#b9adc6",
+      "night-rule": "#3a3458",
+      "amber": "#f2c14e",
+      "amber-hi": "#ffd97a",
+      "amber-lo": "#c98a1b"
+    },
+    "dark": {
+      "paper": "#17152b",
+      "surface": "#1f1c36",
+      "ink": "#ece4d3",
+      "muted": "#a99fb8",
+      "rule": "#302b4c",
+      "accent": "#f2c14e",
+      "accent-soft": "#3d3220"
+    }
+  }
 }

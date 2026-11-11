@@ -63,7 +63,7 @@ make web       # the real script in a browser at http://localhost:8800/
   plugin) are the model here.
 - `~/projects/norns-web`: the browser runtime (its own repo; pollen carries it as a subtree).
 - `~/projects/norns-mi-UGens`: mi-UGens for norns and as WebAssembly (`lib/Engine_Pollen/` holds
-  MiVerb from it).
+  MiVerb from it, and `sky.js`, the web page's scene: the field, the wind, the station's hour).
 
 ## Environment
 

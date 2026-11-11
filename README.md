@@ -142,7 +142,7 @@ lib/walker.lua           the wind: where to go next (great circles, nearest, ant
 lib/json.lua             JSON, decode and encode
 lib/Engine_Pollen.sc     the engine: writer -> reel -> grains -> filter, drive, media, reverb, limiter
 lib/Engine_Pollen.js     the same engine for the browser (norns ignores it)
-lib/Engine_Pollen/       MiVerb as WebAssembly, for the browser (from norns-mi-UGens)
+lib/Engine_Pollen/       MiVerb as WebAssembly (from norns-mi-UGens), and sky.js, the page's field and sky
 tools/norns-web/         the script in a browser (a git subtree of carlosedp/norns-web)
 test/                    the Lua smoke test, the browser engine's offline render, the engine on scsynth
 docs/                    SPEC.md (the plumbing) and DESIGN.md (the idea and the decisions)
