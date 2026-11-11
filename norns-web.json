@@ -41,6 +41,14 @@
       "url": "https://github.com/glassgarden/pollen"
     },
     {
+      "label": "the manual",
+      "url": "https://github.com/glassgarden/pollen/blob/main/doc/MANUAL.md"
+    },
+    {
+      "label": "the manual (PDF)",
+      "url": "https://github.com/glassgarden/pollen/blob/main/doc/pollen-manual.pdf"
+    },
+    {
       "label": "norns-web",
       "url": "https://github.com/carlosedp/norns-web"
     },
@@ -84,5 +92,50 @@
       "accent": "#f2c14e",
       "accent-soft": "#3d3220"
     }
-  }
+  },
+  "gallery_intro": "Six parts, each a knob pair, a gesture and a variety. Turn E1 to pick the part, E2 and E3 to shape it, K3 for its gesture, and hold K2 while turning E2 for its variety.",
+  "gallery": [
+    {
+      "img": "doc/img/wind.png",
+      "title": "wind",
+      "alt": "The wind part: pace and reach, the globe on the left",
+      "text": "When and where the radio moves on. Pace: how often (still, or every 10 minutes to every 30 seconds). Reach: how far, from the next town to across an ocean. K3 drifts now. The variety is the wind: breeze, trade wind, eddy, gust or far side."
+    },
+    {
+      "img": "doc/img/catch.png",
+      "title": "catch",
+      "alt": "The catch part: three heads, a bracket for each under the tape",
+      "text": "The reel the radio is caught on. Position: how far back the grains read, from almost live to seconds ago. Feedback: grains recorded back onto the reel, into smears and drones. K3 presses the reel (it holds what it has). The variety is its length, 4 to 60 s; hold K2 and turn E3 for up to four heads."
+    },
+    {
+      "img": "doc/img/scatter.png",
+      "title": "scatter",
+      "alt": "The scatter part: density and size",
+      "text": "The grains. Density: from one every two seconds to 40 a second. Size: from a 20 ms click to a 2 s wash. K3 is a burst. The variety is the grain's shape: bell, pluck or block."
+    },
+    {
+      "img": "doc/img/tint.png",
+      "title": "tint",
+      "alt": "The tint part: pitch and spread",
+      "text": "The grains' pitch, snapped to a scale. Pitch: two octaves down to two up. Spread: how far each grain wanders, and past the middle some play backwards. K3 flips them all. The variety is the scale; hold K2 and turn E3 to spread the heads into a chord."
+    },
+    {
+      "img": "doc/img/tone.png",
+      "title": "tone",
+      "alt": "The tone part: color and drive",
+      "text": "The color. Color: one filter knob, a low-pass to the left, a high-pass to the right, open in the middle. Drive: clean to crunchy. K3 is a shortwave fade. The variety is the media, after Beads: digital, vintage, clean tape or dirty tape."
+    },
+    {
+      "img": "doc/img/air.png",
+      "title": "air",
+      "alt": "The air part: space and mix",
+      "text": "The space and the mix. Space: how much goes to the reverb, and how big it is. Mix: the station alone, the grains alone, or both. K3 holds the reverb's haze."
+    },
+    {
+      "img": "doc/img/peek.png",
+      "title": "peek",
+      "alt": "The peek: every part's two knobs as bars, the station at the bottom",
+      "text": "Hold K1 to see every part's knobs at once, and the station you're on. Hold K1 and press K2 to go back to the station before."
+    }
+  ]
 }

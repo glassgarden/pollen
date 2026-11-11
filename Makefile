@@ -6,7 +6,7 @@ DEST  ?= /home/we/dust/code/pollen
 NORNS_WEB ?= https://github.com/carlosedp/norns-web
 
 .DEFAULT_GOAL := help
-.PHONY: help web stop test test-sc build clean deploy norns-web-pull norns-web-push
+.PHONY: help web stop test test-sc build clean deploy manual manual-shots manual-scene manual-pdf norns-web-pull norns-web-push
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{ printf "  make %-15s %s\n", $$1, $$2 }'
@@ -42,6 +42,23 @@ deploy: test ## copy the script to the norns (needs ssh access)
 # so these put the GNU one first on the PATH when there is one.
 SUBTREE = d=$$(mktemp -d); g=$$(command -v gnudirname || command -v gdirname); \
 	[ -n "$$g" ] && ln -s "$$g" $$d/dirname; PATH=$$d:$$PATH git subtree
+# the manual (doc/MANUAL.md -> doc/pollen-manual.pdf) and its pictures, from the script in
+# norns-web (node and a Chromium: `npx playwright install chromium`, or CHROMIUM=...)
+MANUAL_DEPS = @[ -d tools/manual/node_modules ] || npm --prefix tools/manual install --no-fund --no-audit
+manual: manual-shots manual-scene manual-pdf ## all of the manual: the screens, the scene, the PDF
+
+manual-shots: ## the screen's pictures (doc/img; a live station plays, so each run differs)
+	$(MANUAL_DEPS)
+	node tools/manual/shots.mjs
+
+manual-scene: ## the page's field for the manual's cover and chapter rules (doc/img/manual-*.png)
+	$(MANUAL_DEPS)
+	node tools/manual/scene.mjs
+
+manual-pdf: ## build doc/pollen-manual.pdf from doc/MANUAL.md
+	$(MANUAL_DEPS)
+	node tools/manual/pdf.mjs
+
 norns-web-pull: ## update tools/norns-web from the norns-web repo (NORNS_WEB=..., BRANCH=main)
 	$(SUBTREE) pull --prefix=tools/norns-web $(NORNS_WEB) $(or $(BRANCH),main) --squash
 norns-web-push: ## send commits to tools/norns-web back to the norns-web repo, as BRANCH
