@@ -18,11 +18,11 @@
 -- radio; without them, it
 -- plays the norns input
 --
--- v0.2 by Voltage Foundry Modular
+-- v0.2 by glassgarden.
 -- vfmod.com
 -- github.com/glassgarden/pollen
 
--- Copyright (C) 2026 Voltage Foundry Modular. Free software under the GNU GPL v3.0
+-- Copyright (C) 2026 glassgarden. / Voltage Foundry Modular. Free software under the GNU GPL v3.0
 -- (see LICENSE).
 
 engine.name = "Pollen"

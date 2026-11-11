@@ -164,7 +164,7 @@ BRANCH=...` sends changes back.
 
 ## License and credits
 
-pollen is made by [Voltage Foundry Modular](https://vfmod.com). © 2026 Voltage Foundry Modular.
+pollen is made by [glassgarden.](https://glassgarden.cc). © 2026 glassgarden. / Voltage Foundry Modular.
 
 - **The code** is free software under the GNU GPL v3.0 (see [LICENSE](LICENSE)).
 - **Ideas from** Émilie Gillet's Mutable Instruments Clouds and Beads (their code is MIT): the

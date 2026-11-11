@@ -1,5 +1,5 @@
 // Engine_Pollen: the sound of pollen, a live granular reel.
-// Copyright (C) 2026 Voltage Foundry Modular (vfmod.com). GPL-3.0, see LICENSE.
+// Copyright (C) 2026 glassgarden. (glassgarden.cc). GPL-3.0, see LICENSE.
 //
 //   input (norns in: the ADC, later the radio) -> writer -> the reel (2 mono buffers, a loop)
 //   reel -> grains (2x GrainBuf, read back from the write head) -> wet, and back into the writer

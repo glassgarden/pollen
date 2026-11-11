@@ -49,7 +49,7 @@
       "url": "https://monome.org/docs/norns/"
     }
   ],
-  "footer": "pollen is made by Voltage Foundry Modular · © 2026 · code under the GNU GPL v3.0 · after ideas from Mutable Instruments Clouds and Beads (Émilie Gillet, MIT) · reverb: Volker Böhm's mi-UGens · stations: radio-browser.info",
+  "footer": "pollen is made by glassgarden., a project of Carlos E. · © 2026 · code under the GNU GPL v3.0 · after ideas from Mutable Instruments Clouds and Beads (Émilie Gillet, MIT) · reverb: Volker Böhm's mi-UGens · stations: radio-browser.info",
   "actions": [
     {
       "label": "Drift",
