@@ -9,8 +9,8 @@
 Pollen grains and radio waves both cross the planet through the sky and land far from where they
 started. pollen will tune into live radio stations around the globe, wander from one to the next on
 the wind, and catch each one on a reel that it scatters as grains, in the spirit of Make Noise
-Morphagene and Endorphin.es Evil Pet. See [docs/DESIGN.md](docs/DESIGN.md) for the idea and
-[docs/SPEC.md](docs/SPEC.md) for the plumbing.
+Morphagene and Endorphin.es Evil Pet. See [doc/DESIGN.md](doc/DESIGN.md) for the idea and
+[doc/SPEC.md](doc/SPEC.md) for the plumbing.
 
 > **Version 0.2 (in development).** The radio plays: stations from radio-browser.info, the wind
 > carrying you between them, each one caught on the reel and scattered as grains. The globe view
