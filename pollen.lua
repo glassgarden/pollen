@@ -166,9 +166,23 @@ local function remove_radio()
   end)
 end
 
+-- mi-UGens are optional (the reverb is MiVerb with them, FreeVerb2 without), so they're offered
+-- here and never at launch. norns-deps' screen restarts SuperCollider after, to load or let go of them.
+local function install_mi()
+  if needs.mi_ok() then say("mi-UGens installed") return end
+  needs.mi_install(function() end)
+end
+
+local function remove_mi()
+  if not needs.mi_installed() then say("not installed by pollen") return end
+  needs.mi_remove(function(ok)
+    if ok then print("pollen: mi-UGens removed (what pollen installed); the reverb is FreeVerb2 after a restart") end
+  end)
+end
+
 local function add_params()
   local macro_spec = function(d) return controlspec.new(0, 1, "lin", 0, d, "", 0.01) end
-  local counts = { wind = 4, catch = 5, scatter = 3, tint = 5, tone = 3, air = 3 }
+  local counts = { wind = 4, catch = 5, scatter = 3, tint = 5, tone = 3, air = 5 }
   for _, P in ipairs(PARTS) do
     params:add_group("pollen_" .. P.id, P.id, counts[P.id])
     for i, name in ipairs(P.macros) do
@@ -216,6 +230,12 @@ local function add_params()
     if P.hold then
       params:add_binary(P.hold, P.gesture, "toggle", 0)
       params:set_action(P.hold, send)
+    end
+    if P.id == "air" then -- MiVerb's mi-UGens, optional: installed, and taken away again
+      params:add_trigger("mi_install", "install mi-UGens")
+      params:set_action("mi_install", function() install_mi() end)
+      params:add_trigger("mi_remove", "remove mi-UGens")
+      params:set_action("mi_remove", function() remove_mi() end)
     end
   end
   params:add_group("pollen_radio", "radio", 7)

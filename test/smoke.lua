@@ -75,6 +75,7 @@ js_bridge = {
   engine_name = function() end,
   os_capture = function(cmd)
     if cmd:match("^pkill %-f 'input%-ipc%-server=/tmp/pollen_%[ab%]'") then killed = killed + 1; return "" end
+    if cmd:match("^find .*'Mi%*%.sc'") then return "/x/MiVerb.sc" end -- as the browser answers
     return cmd:match("^command %-v (%a+)") and "/usr/bin/x" or ""
   end,
   system_cmd = function(id, cmd) norns_web.system_cmd_done(id, fake_cmd(cmd)) end,
@@ -293,6 +294,51 @@ do
   js_bridge.os_capture = real
 end
 ok("radio: install and remove screens")
+
+-- mi-UGens (PARAMS > air), optional: with MiVerb there, "install" opens no screen, and with nothing
+-- pollen installed, "remove" opens none. Without it, the install screen: a pinned, checked download
+-- and the tarball's install.sh, K2 installs nothing. Removing the radio's programs leaves a
+-- mi-UGens record alone, and the other way round.
+do
+  local own = key
+  params:set("mi_install", 1)
+  params:set("mi_remove", 1)
+  assert(key == own, "mi-UGens install/remove opened a screen with nothing to do")
+  local needs = include("lib/needs")
+  needs.DIR = _path.data .. "deps"
+  needs.platform = { arch = "armv7l", desktop = false, norns = true, shield = true, os_id = "debian",
+    os_name = "Debian", pm = "apt", priv = "sudo", home = _path.data }
+  local real = js_bridge.os_capture
+  js_bridge.os_capture = function(cmd) if cmd:match("^find ") then return "" end return real(cmd) end
+  assert(not needs.mi_ok(), "MiVerb should be missing")
+  local s = needs.deps():session({ "mi-UGens" })
+  assert(s.state == "review" and #s.queue == 2, "the mi-UGens install should be two steps, waiting for K3")
+  local get, put = s.queue[1].step.run, s.queue[2].step.run
+  assert(get:match("/releases/download/v[%d.]+/mi%-UGens%-norns%-v[%d.]+%.tar%.gz") and get:match("sha256sum"),
+    "the mi-UGens download isn't a pinned, checked release: " .. get)
+  assert(put:match("install%.sh"), "the mi-UGens install doesn't run the tarball's install.sh")
+  local answer
+  needs.mi_install(function(ok) answer = ok end)
+  assert(key ~= own, "the mi-UGens install screen didn't take the keys")
+  run(0.5)
+  key(2, 1); key(2, 0)
+  run(0.5)
+  assert(answer == false and key == own, "K2 on the mi-UGens install screen didn't give the keys back")
+  js_bridge.os_capture = real
+  -- one manifest, two kinds of things in it
+  local d = needs.deps()
+  d:manifest():record("mi-UGens", { label = "mi-UGens", steps = { { cmd = "true" } } })
+  assert(needs.mi_installed() and not needs.installed(), "the manifest's records got mixed up")
+  needs.remove(function() end)
+  assert(key == own, "removing mpv and socat opened a screen for mi-UGens")
+  needs.mi_remove(function() end)
+  assert(key ~= own, "the mi-UGens remove screen didn't take the keys")
+  run(0.5)
+  key(2, 1); key(2, 0)
+  assert(key == own and needs.mi_installed(), "K2 on the mi-UGens remove screen removed something")
+  d:manifest():forget("mi-UGens")
+end
+ok("mi-UGens: install and remove screens")
 
 -- cleanup stops the players
 cleanup()

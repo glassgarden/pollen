@@ -96,6 +96,9 @@ Founder and creator of glassgarden<span style='color: #d9a441;'>.</span> / Volta
   install them the first time you open it: one press of K3.
 - Optional: the **mi-UGens**, the Mutable Instruments sound modules for norns. With them, the
   reverb is MiVerb, the reverb from Clouds and Rings; without them, a plainer one stands in.
+  pollen doesn't ask for them: **PARAMS > air > install mi-UGens** installs them (it needs
+  Wi-Fi), and K3 then restarts norns to load them. **remove mi-UGens**, next to it, takes away
+  what pollen installed (a set that was already there, from terrarium say, is left alone).
 
 To install pollen, type this in the maiden REPL:
 

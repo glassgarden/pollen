@@ -38,8 +38,13 @@ pollen starts again with the radio. K2 says "not now": pollen plays the norns in
 removes exactly what pollen installed (a copy that was already there is left alone). The
 libraries mpv brought along stay; `sudo apt autoremove` over ssh takes those too (read its list
 first). By hand, instead: `sudo apt install -y --no-install-recommends mpv socat`, and `sudo apt
-remove mpv socat`. mi-UGens are optional: with them, the reverb is MiVerb, the reverb
-from Clouds and Rings; without them, FreeVerb2.
+remove mpv socat`.
+
+**mi-UGens are optional**: with them, the reverb is MiVerb, the reverb from Clouds and Rings;
+without them, FreeVerb2. pollen never asks for them; **PARAMS > air > install mi-UGens** downloads
+a norns build of [mi-UGens](https://github.com/glassgarden/mi-UGens) (the same one terrarium and
+fx_miUGens install), then K3 restarts norns to load them. **PARAMS > air > remove mi-UGens** takes
+away what pollen installed.
 
 ## Controls
 
@@ -152,7 +157,7 @@ lib/sound.lua            every macro -> engine parameter mapping (where the soun
 lib/view.lua             the screen: the globe and the stations, the tape and the grains
 lib/radio.lua            the radio: tuning a station (press, static, load, crossfade, release)
 lib/stations.lua         the stations, from radio-browser.info, cached on the norns
-lib/needs.lua            mpv and socat: the install and remove screens (lib/deps/: norns-deps, vendored)
+lib/needs.lua            mpv, socat and (optional) mi-UGens: the install and remove screens (lib/deps/: norns-deps, vendored)
 lib/player.lua           two mpv players, over JACK into the engine, driven through socat
 lib/walker.lua           the wind: where to go next (great circles, nearest, antipodes)
 lib/json.lua             JSON, decode and encode

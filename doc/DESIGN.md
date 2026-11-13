@@ -267,9 +267,14 @@ commit, and the one change made here). `lib/needs.lua` is pollen's side:
   (`uname`, apt, sudo, through `io.popen`), which the browser's Lua can't do. In the browser the
   stand-in answers that mpv is there, so it never loads; the smoke test opens the screen with a
   pretend norns platform (`needs.platform`).
-- **mi-UGens stay optional and aren't offered.** norns-deps' screen is one decision for the whole
-  list, so an optional reverb would ride along with the radio's install. Without them the air is
-  FreeVerb2; terrarium's installer (or mi-UGens' release) puts them in.
+- **mi-UGens stay optional, offered only from PARAMS (November 2026).** norns-deps' screen is one
+  decision for the whole list, so they aren't on the radio's screen at launch: an optional reverb
+  would ride along with the radio's install. Without them the air is FreeVerb2. PARAMS > air has
+  _install mi-UGens_ (a screen of its own: a pinned, sha256-checked norns build of mi-UGens and the
+  install.sh inside it, which moves older installs aside, as terrarium and fx_miUGens do; then a
+  restart, since SuperCollider loads them as it starts) and _remove mi-UGens_ (only what pollen
+  installed). The one manifest holds both kinds, so each remove names its ids: the radio's leaves
+  mi-UGens alone. The browser plays MiVerb, so its stand-in answers the check's `find` with it.
 
 ## The seed vault: radio for offline
 
