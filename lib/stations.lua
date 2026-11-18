@@ -7,7 +7,7 @@
 --   St.refresh(cb)    fetch again, whatever the cache says
 --
 -- A station: { id, name, place, country, lat, lon, url, bitrate (kbps, 0 if unknown), codec }.
--- Never blocks for the network: curl runs through norns.system_cmd.
+-- Never blocks for the network: curl runs through norns.system_cmd, into a file.
 
 local json = include("lib/json")
 
@@ -24,6 +24,8 @@ St.LAST_RESORT = "all.api.radio-browser.info"
 
 -- in the script's data folder (norns.state.data: dust/data/<the script's folder>/)
 local function cache_file() return norns.state.data .. "stations_radiobrowser.lua" end
+-- curl's download, read and removed once it's done
+local function download_file() return norns.state.data .. "stations_radiobrowser.json" end
 
 local function trim(s) return (tostring(s or ""):gsub("^%s+", ""):gsub("%s+$", ""):gsub("%s+", " ")) end
 
@@ -71,14 +73,21 @@ function St.url(server)
 end
 
 function St.refresh(cb)
+  util.make_dir(norns.state.data) -- norns makes it before the script runs; norns-web doesn't
   local order = {}
   for i, s in ipairs(St.SERVERS) do table.insert(order, math.random(i), s) end
   order[#order + 1] = St.LAST_RESORT
   local function try(i)
     if i > #order then cb(nil, "no radio-browser server answered"); return end
-    local cmd = ("curl -sfL -m 30 -A '%s' '%s'"):format(St.UA, St.url(order[i]))
-    norns.system_cmd(cmd, function(out)
-      local ok, records = pcall(json.decode, out or "")
+    -- to a file, not through system_cmd's output: the list is ~2 MB, and norns 3.x keeps only
+    -- the first 1 MiB of a command's output (SYSTEM_CMD_CAPTURE_MAX), cutting the JSON short
+    local file = download_file()
+    os.remove(file)
+    local cmd = ("curl -sfL -m 30 -A '%s' -o '%s' '%s'"):format(St.UA, file, St.url(order[i]))
+    norns.system_cmd(cmd, function()
+      local f, body = io.open(file, "r"), ""
+      if f then body = f:read("a") or ""; f:close(); os.remove(file) end
+      local ok, records = pcall(json.decode, body)
       local list = ok and St.simplify(records) or {}
       if #list == 0 then
         print("pollen: " .. order[i] .. (ok and " sent no stations" or (": " .. tostring(records))))

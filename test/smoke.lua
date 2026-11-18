@@ -43,7 +43,14 @@ local function fake_mpv(cmd)
   return '{"request_id":0,"error":"success"}\n'
 end
 fake_cmd = function(cmd)
-  if cmd:match("^curl .*radio%-browser") then curls = curls + 1; return STATIONS_JSON end
+  if cmd:match("^curl .*radio%-browser") then
+    -- the list goes to curl's -o file: norns 3.x cuts a command's output at 1 MiB, and the
+    -- real list is ~2 MB, so nothing comes back through system_cmd
+    curls = curls + 1
+    local path = assert(cmd:match(" %-o '([^']+)'"), "curl for the stations writes no file (-o)")
+    local f = assert(io.open(path, "w")); f:write(STATIONS_JSON); f:close()
+    return ""
+  end
   if cmd:match("^nohup mpv") then return "" end
   assert(not cmd:match("^pkill"), "pkill through system_cmd: it would wait in the queue")
   local out = {}
