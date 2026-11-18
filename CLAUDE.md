@@ -36,6 +36,9 @@ make web       # the real script in a browser at http://localhost:8800/
   `test/engine.mjs` and `test/sc/engine.scd` make the same checks on each; keep them in step.
 - **Never write mi-UGens class names in the .sc file.** Look them up with `\MiVerb.asClass`; a
   missing class fails sclang for every norns script. Without mi-UGens the engine must still play.
+- **`lib/Engine_Pollen.sc` is the only .sc file.** norns' sclang compiles every .sc under dust,
+  test folders included: a second class (test/sc's CroneEngine stand-in) fails SuperCollider for
+  every script. Test classes stay `.sc.stub`; the smoke test checks.
 - **K1 is hold-only.** A quick K1 tap opens the norns system menu.
 - **No numbers on screen.** The picture is the readout; names show briefly on touch; hold K1 peeks.
 - Params group sizes are declared up front (`counts` in `add_params`); the smoke test checks them.

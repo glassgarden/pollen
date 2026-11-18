@@ -1,5 +1,7 @@
 // A stand-in for norns' CroneEngine, for test/sc/engine.scd: the same construction (alloc in a
 // routine, then the done callback), commands and polls kept in tables the test can call.
+// Never name it .sc in the repo: norns compiles every .sc in dust, and a second CroneEngine
+// fails sclang. test/sc/run.sh copies it in as CroneEngine.sc inside the container.
 CroneEngine {
 	var <context, <commands, <polls;
 
