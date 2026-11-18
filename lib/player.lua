@@ -46,7 +46,7 @@ function P.launch()
   for _, name in ipairs(P.NAMES) do
     norns.system_cmd(table.concat({
       "nohup mpv --idle=yes --no-video --no-terminal --really-quiet",
-      "--ao=jack --jack-name=pollen_" .. name, "--jack-autoconnect=yes --jack-port=" .. quote(P.JACK_TO),
+      "--ao=jack --jack-name=pollen_" .. name, "--jack-connect=yes --jack-port=" .. quote(P.JACK_TO),
       "--audio-samplerate=48000 --cache=yes --demuxer-readahead-secs=2 --network-timeout=10",
       "--volume=0 --input-ipc-server=" .. P.socket(name), ">/dev/null 2>&1 &",
     }, " "))

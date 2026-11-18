@@ -120,7 +120,7 @@ Backend is a param (`radiogarden` / `radiobrowser`), auto-fallback if the first 
 
   ```txt
   mpv --no-video --idle --no-terminal \
-      --ao=jack --jack-name=pollen_a --jack-autoconnect=no \
+      --ao=jack --jack-name=pollen_a --jack-connect=no \
       --audio-samplerate=48000 --cache=yes --demuxer-readahead-secs=2 \
       --input-ipc-server=/dev/shm/pollen_a.sock
   ```
