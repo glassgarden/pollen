@@ -23,6 +23,7 @@ local R = { stations = nil, current = nil, status = "starting", busy = false }
 
 R.DEAD_FOR = 3600 -- seconds a station that didn't play is left alone
 R.TRIES = 4       -- stations tried in one move before giving up
+R.READY_FOR = 15  -- seconds the first move waits for mpv to answer
 
 local hooks = {}
 local live = "a"  -- the player that's playing (or will, the first time)
@@ -153,7 +154,16 @@ function R.init(h)
     R.stations = list
     print(("pollen: %d stations (%s)"):format(#list, where))
     clock.run(function()
-      clock.sleep(1) -- mpv opens its socket a moment after it starts
+      -- mpv opens its socket a while after it starts (~1.5 s on a norns, more while it's busy);
+      -- a move before then fails every station at once and marks them dead, so wait for both
+      -- players to answer (up to R.READY_FOR seconds, then try anyway)
+      local waited = 0
+      for _, name in ipairs(Player.NAMES) do
+        while waited < R.READY_FOR and call(name, { "get_property", "idle-active" }, 1).error ~= "success" do
+          clock.sleep(0.25)
+          waited = waited + 0.25
+        end
+      end
       move()
     end)
   end)

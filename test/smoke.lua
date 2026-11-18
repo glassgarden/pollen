@@ -23,6 +23,7 @@ local STATIONS_JSON = json.encode(records)
 -- first station asked for never plays (a dead stream).
 local mpv = { a = {}, b = {} }
 local loads, curls, killed, first = {}, 0, 0, true
+local starting = 6 -- mpv commands that go unanswered while mpv starts
 local fake_cmd
 local function fake_mpv(cmd)
   local line, name = cmd:match("^echo '(.*)' | socat %- /tmp/pollen_(%a)%.sock")
@@ -53,6 +54,9 @@ fake_cmd = function(cmd)
   end
   if cmd:match("^nohup mpv") then return "" end
   assert(not cmd:match("^pkill"), "pkill through system_cmd: it would wait in the queue")
+  -- mpv takes a while to open its socket: the first commands find nobody (socat fails, no
+  -- output), and the first move must wait for it rather than mark its stations dead
+  if starting > 0 then starting = starting - 1; return "" end
   local out = {}
   for l in cmd:gmatch("[^\n]+") do out[#out + 1] = fake_mpv(l) end -- a line per mpv command
   return table.concat(out)
