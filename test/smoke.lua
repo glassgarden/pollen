@@ -23,6 +23,7 @@ local STATIONS_JSON = json.encode(records)
 -- first station asked for never plays (a dead stream).
 local mpv = { a = {}, b = {} }
 local loads, curls, killed, first = {}, 0, 0, true
+local starting = 6 -- mpv commands that go unanswered while mpv starts
 local fake_cmd
 local function fake_mpv(cmd)
   local line, name = cmd:match("^echo '(.*)' | socat %- /tmp/pollen_(%a)%.sock")
@@ -43,9 +44,19 @@ local function fake_mpv(cmd)
   return '{"request_id":0,"error":"success"}\n'
 end
 fake_cmd = function(cmd)
-  if cmd:match("^curl .*radio%-browser") then curls = curls + 1; return STATIONS_JSON end
+  if cmd:match("^curl .*radio%-browser") then
+    -- the list goes to curl's -o file: norns 3.x cuts a command's output at 1 MiB, and the
+    -- real list is ~2 MB, so nothing comes back through system_cmd
+    curls = curls + 1
+    local path = assert(cmd:match(" %-o '([^']+)'"), "curl for the stations writes no file (-o)")
+    local f = assert(io.open(path, "w")); f:write(STATIONS_JSON); f:close()
+    return ""
+  end
   if cmd:match("^nohup mpv") then return "" end
   assert(not cmd:match("^pkill"), "pkill through system_cmd: it would wait in the queue")
+  -- mpv takes a while to open its socket: the first commands find nobody (socat fails, no
+  -- output), and the first move must wait for it rather than mark its stations dead
+  if starting > 0 then starting = starting - 1; return "" end
   local out = {}
   for l in cmd:gmatch("[^\n]+") do out[#out + 1] = fake_mpv(l) end -- a line per mpv command
   return table.concat(out)
