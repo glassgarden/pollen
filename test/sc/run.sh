@@ -1,6 +1,9 @@
 #!/bin/sh
 # Compiles lib/Engine_Pollen.sc and plays it on a real scsynth, in a container (podman or
-# docker): jackd's dummy driver stands in for a sound card, test/sc/CroneEngine.sc for norns'.
+# docker): jackd's dummy driver stands in for a sound card, test/sc/CroneEngine.sc.stub for
+# norns'. The stub is copied in as CroneEngine.sc only inside the container: as a .sc in the
+# repo, norns' sclang compiles it from dust next to the real CroneEngine, and the duplicate
+# class fails SuperCollider for every script.
 #
 #   test/sc/run.sh          (from anywhere; builds the image the first time)
 #
@@ -13,7 +16,8 @@ RUN=$(command -v podman || command -v docker)
 "$RUN" run --rm -v "$PWD":/w:Z -w /w pollen-sc sh -c '
   jackd -r -d dummy -r 48000 -p 256 >/tmp/jack.log 2>&1 &
   sleep 1
-  printf "includePaths:\n  - /w/lib\n  - /w/test/sc\n" > /tmp/conf.yaml
+  mkdir -p /tmp/stub && cp test/sc/CroneEngine.sc.stub /tmp/stub/CroneEngine.sc
+  printf "includePaths:\n  - /w/lib\n  - /tmp/stub\n" > /tmp/conf.yaml
   export XDG_RUNTIME_DIR=/tmp QTWEBENGINE_CHROMIUM_FLAGS=--no-sandbox QTWEBENGINE_DISABLE_SANDBOX=1
   QT_QPA_PLATFORM=offscreen timeout 300 sclang -l /tmp/conf.yaml test/sc/engine.scd 2>&1 \
     | grep -v -E "^(compiling|Found|Compil|NumPrimitives|SC_AudioDriver|Welcome|  |-> |Booting|JackDriver|jackdmp|Copyright|This is free|JACK server|server name|PublisherGraph|Requesting|SuperCollider 3 server|Shared memory|Server .local. exited|class library|\*\*\* Welcome)"

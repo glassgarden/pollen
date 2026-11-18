@@ -340,6 +340,19 @@ do
 end
 ok("mi-UGens: install and remove screens")
 
+-- norns' sclang compiles every .sc under dust: the engine is the only class file pollen may
+-- ship. Another one (a test stub of CroneEngine) clashes with norns' classes and fails
+-- SuperCollider for every script.
+do
+  local f = io.popen("find . -name '*.sc' -not -path './.git/*' -not -path './tools/*'")
+  local found = {}
+  for line in f:lines() do if line ~= "./lib/Engine_Pollen.sc" then found[#found + 1] = line end end
+  f:close()
+  assert(#found == 0, "only lib/Engine_Pollen.sc may be a .sc file (norns compiles them all): "
+    .. table.concat(found, " "))
+end
+ok("class files: only the engine")
+
 -- cleanup stops the players
 cleanup()
 assert(killed >= 2, "cleanup didn't stop mpv") -- once at start (leftovers), once now
